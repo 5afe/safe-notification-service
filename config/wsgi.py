@@ -1,5 +1,5 @@
 """
-WSGI config for safe_service project.
+WSGI config for Gnosis Safe Push Service project.
 
 This module contains the WSGI application used by Django's development server
 and any production WSGI deployments. It should expose a module-level variable
@@ -19,12 +19,12 @@ import sys
 from django.core.wsgi import get_wsgi_application
 
 # This allows easy placement of apps within the interior
-# safe_service directory.
-app_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
-sys.path.append(os.path.join(app_path, 'safe_service'))
+# gnosis_safe_push_service directory.
+app_path = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir))
+sys.path.append(os.path.join(app_path, 'gnosis_safe_push_service'))
 
-# if os.environ.get('DJANGO_SETTINGS_MODULE') == 'config.settings.production':
-#     from raven.contrib.django.raven_compat.middleware.wsgi import Sentry
+
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -36,8 +36,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 application = get_wsgi_application()
-# if os.environ.get('DJANGO_SETTINGS_MODULE') == 'config.settings.production':
-#     application = Sentry(application)
+
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)

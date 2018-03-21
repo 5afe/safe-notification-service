@@ -13,7 +13,7 @@ requirements = [
 ]
 
 setup(
-    name='safe_service',
+    name='gnosis_safe_push_service',
     version='0.0.1',
     packages=find_packages(exclude=["*.tests",
                                     "*.tests.*",

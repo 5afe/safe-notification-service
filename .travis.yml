@@ -3,6 +3,10 @@ cache: pip
 python:
   - "3.6"
 dist: trusty
+env:
+  global:
+    - DATABASE_URL=psql://postgres@localhost/travisci
+    - PIP_USE_MIRRORS=true
 addons:
   ssh_known_hosts:
   - gnosisdb-kovan.gnosis.pm
@@ -10,8 +14,6 @@ services:
   - postgresql
 before_script:
   - psql -c 'create database travisci;' -U postgres
-before_install:
-  - export PIP_USE_MIRRORS=true
 install:
   - pip install -r requirements.txt
   - pip install coveralls
