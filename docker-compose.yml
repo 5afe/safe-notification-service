@@ -29,7 +29,6 @@ services:
     command: scripts/run_web.sh
     ports:
       - "27017"
-      - "5432"
     volumes:
       - nginx-shared:/safe-nginx
 volumes:
