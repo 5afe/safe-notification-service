@@ -22,8 +22,8 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     license='MIT License',
-    description='The Gnosisdb django app',
-    url='https://github.com/gnosis/gnosisdb',
+    description='Gnosis Safe Service backend',
+    url='https://github.com/gnosis/gnosis-safe-push-service',
     author='Gnosis Inc.',
     author_email='giacomo.licari@gnosis.pm, denis@gnosis.pm, stefan@gnosis.pm, uxio@gnosis.pm',
     classifiers=[
