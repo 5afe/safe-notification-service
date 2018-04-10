@@ -55,7 +55,7 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-# .env
+.env
 
 .vagrant
 .idea/
@@ -68,3 +68,7 @@ typings/
 .ipfs
 
 .idea
+
+venv/
+config/settings/dev.py
+db.sqlite3
