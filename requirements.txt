@@ -8,8 +8,8 @@ django-filter==1.1.0
 django-model-utils==3.1.1
 django-rest-swagger==2.1.2
 django_google_authenticator==0.5
-djangorestframework-camel-case==0.2.0
 djangorestframework==3.8.2
+djangorestframework-camel-case==1.0b1
 docutils==0.14
 eth-abi==1.0.0
 eth-utils==1.0.2
