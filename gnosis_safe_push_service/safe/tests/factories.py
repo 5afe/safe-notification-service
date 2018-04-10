@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
+import hashlib
+import random
+
 from faker import Factory as FakerFactory
 from faker import Faker
-import random
-import hashlib
-
 
 fakerFactory = FakerFactory.create()
 faker = Faker()

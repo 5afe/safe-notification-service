@@ -1,6 +1,7 @@
 from django.conf import settings
-from gnosis_safe_push_service.safe.utils import singleton
 from firebase_admin import credentials, initialize_app, messaging
+
+from gnosis_safe_push_service.safe.utils import singleton
 
 
 @singleton
