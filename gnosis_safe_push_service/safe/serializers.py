@@ -1,4 +1,3 @@
-from ethereum.utils import sha3
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -20,6 +19,13 @@ class SignedMessageSerializer(serializers.Serializer):
     signature = SignatureSerializer()
 
     @property
+    def ethereum_signed_message(self) -> EthereumSignedMessage:
+        v = self.validated_data['signature']['v']
+        r = self.validated_data['signature']['r']
+        s = self.validated_data['signature']['s']
+        return EthereumSignedMessage(self.message, v, r, s)
+
+    @property
     def hashed_fields(self):
         """
         :return: fields to concatenate for hash calculation
@@ -28,19 +34,16 @@ class SignedMessageSerializer(serializers.Serializer):
         return ()
 
     @property
-    def signing_address(self) -> str:
-        return self.ethereum_signed_message.get_signing_address()
-
-    @property
-    def ethereum_signed_message(self) -> EthereumSignedMessage:
-        v = self.validated_data['signature']['v']
-        r = self.validated_data['signature']['r']
-        s = self.validated_data['signature']['s']
-        return EthereumSignedMessage(self.message_hash, v, r, s)
+    def message(self) -> bytes:
+        return ''.join([self.validated_data[hashed_field] for hashed_field in self.hashed_fields])
 
     @property
     def message_hash(self) -> bytes:
-        return sha3(''.join([self.validated_data[hashed_field] for hashed_field in self.hashed_fields]))
+        return self.ethereum_signed_message.message_hash
+
+    @property
+    def signing_address(self) -> str:
+        return self.ethereum_signed_message.get_signing_address()
 
 
 class AuthSerializer(SignedMessageSerializer):

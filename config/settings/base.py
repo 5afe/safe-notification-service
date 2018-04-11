@@ -197,3 +197,7 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
     ),
 }
+
+# SAFE
+
+ETH_HASH_PREFIX = env('ETH_HASH_PREFIX', default='gno')

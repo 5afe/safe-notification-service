@@ -1,7 +1,6 @@
 import json
 
 from django.urls import reverse
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -20,7 +19,7 @@ class TestViews(APITestCase):
 
         request = self.client.post(reverse('api:auth-creation'), data=json.dumps(auth_data),
                                    content_type='application/json')
-        # self.assertEquals(request.status_code, status.HTTP_200_OK)
+        self.assertEquals(request.status_code, status.HTTP_200_OK)
 
     def test_auth_fail(self):
         request = self.client.post(reverse('api:auth-creation'), data=json.dumps({}),

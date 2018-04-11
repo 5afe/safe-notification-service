@@ -1,25 +1,24 @@
 from django.test import TestCase
+from django.conf import settings
 from ethereum import utils
 
 from ..signing import EthereumSignedMessage
+from .factories import get_eth_account_with_key
 
-# from django.conf import settings
 
-
-ETH_ACCOUNT = '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1'
-ETH_ACCOUNT_BAD_CHECKSUM = '0x90f8bf6A479f320ead074411a4B0e7944Ea8c9C1'
-ETH_KEY = bytes.fromhex('4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d')
+ETH_ACCOUNT, ETH_KEY = get_eth_account_with_key()
+ETH_ACCOUNT_BAD_CHECKSUM = ETH_ACCOUNT.lower()
 
 
 class TestSigning(TestCase):
 
     def test_ethereum_signed_message(self):
-        prefix = "gno"
+        prefix = settings.ETH_HASH_PREFIX
         message = "hello"
         prefixed_message = prefix + message
         message_hash = utils.sha3(prefixed_message)
         v, r, s = utils.ecsign(message_hash, ETH_KEY)
-        ethereum_signed_message = EthereumSignedMessage(message_hash, v, r, s)
+        ethereum_signed_message = EthereumSignedMessage(message, v, r, s)
 
         self.assertTrue(ethereum_signed_message.check_message_hash(message))
 

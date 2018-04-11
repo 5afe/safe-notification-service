@@ -1,20 +1,26 @@
-import hashlib
-import random
-
 from faker import Factory as FakerFactory
 from faker import Faker
+
+from gnosis_safe_push_service.ether.signing import EthereumSigner
+from gnosis_safe_push_service.ether.tests.factories import get_eth_account_with_key
+
 
 fakerFactory = FakerFactory.create()
 faker = Faker()
 
-signature_prefix = 'gno'
+ETH_ACCOUNT, ETH_KEY = get_eth_account_with_key()
 
 
 def get_push_token():
-    nonce = str(random.random()).encode()
-    return hashlib.sha256(nonce).hexdigest()
+    return faker.name()
 
 
-def get_signature(token):
-    sign = (signature_prefix + token).encode()
-    return hashlib.sha256(sign).hexdigest()
+def get_signature(message):
+    e = EthereumSigner(message, ETH_KEY)
+    v, r, s = e.v, e.r, e.s
+
+    return {
+        'v': v,
+        'r': r,
+        's': s
+    }
