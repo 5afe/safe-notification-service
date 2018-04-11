@@ -1,12 +1,10 @@
-from django.test import TestCase
 from django.conf import settings
+from django.test import TestCase
 from ethereum import utils
+from faker import Faker
 
 from ..signing import EthereumSignedMessage, EthereumSigner
 from .factories import get_eth_account_with_key
-
-from faker import Faker
-
 
 ETH_ACCOUNT, ETH_KEY = get_eth_account_with_key()
 ETH_ACCOUNT_BAD_CHECKSUM = ETH_ACCOUNT.lower()

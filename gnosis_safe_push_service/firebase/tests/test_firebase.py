@@ -1,6 +1,8 @@
 from django.test import TestCase
+
 from gnosis_safe_push_service.firebase.client import FirebaseClient
-from .utils import send_message, MessagingService, MockCredential
+
+from .utils import MessagingService, MockCredential, send_message
 
 
 class TestFirebase(TestCase):
@@ -17,4 +19,3 @@ class TestFirebase(TestCase):
     def test_send_message(self):
         response = self.firbClient.send_message(message_instance=self.firbMessaging, data={'value': 'mock-value'}, token='mock-token')
         self.assertIsNotNone(response)
-

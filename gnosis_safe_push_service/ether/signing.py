@@ -1,5 +1,5 @@
-from ethereum import utils
 from django.conf import settings
+from ethereum import utils
 
 
 class EthereumSignedMessage:

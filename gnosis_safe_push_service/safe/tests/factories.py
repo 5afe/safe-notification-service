@@ -2,8 +2,8 @@ from faker import Factory as FakerFactory
 from faker import Faker
 
 from gnosis_safe_push_service.ether.signing import EthereumSigner
-from gnosis_safe_push_service.ether.tests.factories import get_eth_account_with_key
-
+from gnosis_safe_push_service.ether.tests.factories import \
+    get_eth_account_with_key
 
 fakerFactory = FakerFactory.create()
 faker = Faker()
@@ -21,6 +21,17 @@ def get_signature(message):
 
     return {
         'v': v,
+        'r': r,
+        's': s
+    }
+
+
+def get_bad_signature(message):
+    ethereum_signer = EthereumSigner(message, ETH_KEY)
+    v, r, s = ethereum_signer.v, ethereum_signer.r, ethereum_signer.s
+
+    return {
+        'v': v * 5,
         'r': r,
         's': s
     }

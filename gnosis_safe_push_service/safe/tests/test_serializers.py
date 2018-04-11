@@ -1,7 +1,11 @@
 from django.test import TestCase
-from .factories import get_push_token, get_signature, ETH_ACCOUNT
-from ..serializers import AuthSerializer
+from rest_framework.exceptions import ValidationError
+
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
+
+from ..serializers import AuthSerializer
+from .factories import (ETH_ACCOUNT, get_bad_signature, get_push_token,
+                        get_signature)
 
 
 class TestSerializers(TestCase):
@@ -27,3 +31,11 @@ class TestSerializers(TestCase):
 
         self.assertEqual(auth_serializer.signing_address, ETH_ACCOUNT)
 
+        bad_auth_data = {
+            'push_token': push_token,
+            'signature': get_bad_signature(push_token)
+        }
+
+        auth_serializer = AuthSerializer(data=bad_auth_data)
+
+        self.assertRaises(ValidationError, auth_serializer.is_valid, raise_exception=True)

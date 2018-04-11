@@ -1,10 +1,10 @@
-from google.auth.credentials import Credentials
-from firebase_admin import messaging, _http_client
-from firebase_admin.credentials import Base
-from requests import adapters, models
-import six
 import json
 
+import six
+from firebase_admin import _http_client, messaging
+from firebase_admin.credentials import Base
+from google.auth.credentials import Credentials
+from requests import adapters, models
 
 FIREBASE_AUTH_CREDENTIALS = {
     "type": "service_account",
