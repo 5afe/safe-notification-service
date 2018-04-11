@@ -1,3 +1,4 @@
+from django.utils.functional import cached_property
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -18,11 +19,11 @@ class SignedMessageSerializer(serializers.Serializer):
     """
     signature = SignatureSerializer()
 
-    @property
+    @cached_property
     def ethereum_signed_message(self) -> EthereumSignedMessage:
-        v = self.validated_data['signature']['v']
-        r = self.validated_data['signature']['r']
-        s = self.validated_data['signature']['s']
+        v = self.initial_data['signature']['v']
+        r = self.initial_data['signature']['r']
+        s = self.initial_data['signature']['s']
         return EthereumSignedMessage(self.message, v, r, s)
 
     @property
@@ -35,7 +36,7 @@ class SignedMessageSerializer(serializers.Serializer):
 
     @property
     def message(self) -> bytes:
-        return ''.join([self.validated_data[hashed_field] for hashed_field in self.hashed_fields])
+        return ''.join([self.initial_data[hashed_field] for hashed_field in self.hashed_fields])
 
     @property
     def message_hash(self) -> bytes:
@@ -44,6 +45,12 @@ class SignedMessageSerializer(serializers.Serializer):
     @property
     def signing_address(self) -> str:
         return self.ethereum_signed_message.get_signing_address()
+
+    def validate(self, data):
+        if int(self.ethereum_signed_message.get_signing_address(), 16):
+            return super().validate(data)
+        else:  # 0x0 address
+            raise ValidationError("Signed message is not valid, signer is ZERO address")
 
 
 class AuthSerializer(SignedMessageSerializer):
