@@ -2,20 +2,6 @@ from ethereum import utils
 from django.conf import settings
 
 
-class EthereumSigner:
-
-    def __init__(self, message: str, key: bytes, hash_prefix: str=settings.ETH_HASH_PREFIX):
-        """
-        :param message: message
-        :param key: ethereum key for signing the message
-        :param hash_prefix: prefix for hashing
-        """
-        self.hash_prefix = hash_prefix
-        self.message = message
-        self.message_hash = utils.sha3(self.hash_prefix + message)
-        self.v, self.r, self.s = utils.ecsign(self.message_hash, key)
-
-
 class EthereumSignedMessage:
 
     def __init__(self, message: str, v: int, r: int, s: int, hash_prefix: str=settings.ETH_HASH_PREFIX):
@@ -32,12 +18,12 @@ class EthereumSignedMessage:
         :type hash_prefix: str
         """
 
+        self.hash_prefix = hash_prefix if hash_prefix else ''
         self.message = message
+        self.message_hash = self.calculate_hash(message)
         self.v = int(v)
         self.r = int(r)
         self.s = int(s)
-        self.hash_prefix = hash_prefix if hash_prefix else ''
-        self.message_hash = self.calculate_hash(message)
 
     def calculate_hash(self, message):
         return utils.sha3(self.hash_prefix + message)
@@ -68,3 +54,16 @@ class EthereumSignedMessage:
         :rtype: bool
         """
         return utils.normalize_address(address) == utils.normalize_address(self.get_signing_address())
+
+
+class EthereumSigner(EthereumSignedMessage):
+
+    def __init__(self, message: str, key: bytes, hash_prefix: str=settings.ETH_HASH_PREFIX):
+        """
+        :param message: message
+        :param key: ethereum key for signing the message
+        :param hash_prefix: prefix for hashing
+        """
+        self.hash_prefix = hash_prefix if hash_prefix else ''
+        v, r, s = utils.ecsign(self.calculate_hash(message), key)
+        super().__init__(message, v, r, s, hash_prefix=hash_prefix)

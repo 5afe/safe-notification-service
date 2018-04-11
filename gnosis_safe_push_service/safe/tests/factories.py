@@ -16,8 +16,8 @@ def get_push_token():
 
 
 def get_signature(message):
-    e = EthereumSigner(message, ETH_KEY)
-    v, r, s = e.v, e.r, e.s
+    ethereum_signer = EthereumSigner(message, ETH_KEY)
+    v, r, s = ethereum_signer.v, ethereum_signer.r, ethereum_signer.s
 
     return {
         'v': v,
