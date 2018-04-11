@@ -11,7 +11,7 @@ services:
       - "8000:8000"
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
-      - nginx-shared:/safe-nginx
+      - nginx-shared:/nginx
     depends_on:
       - web
   db:
@@ -32,5 +32,5 @@ services:
     ports:
       - "27017"
     volumes:
-      - nginx-shared:/safe-nginx
+      - nginx-shared:/nginx
     command: docker/web/run_web.sh
