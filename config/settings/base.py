@@ -1,54 +1,82 @@
-import os
-import sys
+"""
+Base settings to build other settings files upon.
+"""
+
 import environ
 
+ROOT_DIR = environ.Path(__file__) - 3  # (gnosis_safe_push_service/config/settings/base.py - 3 = gnosis_safe_push_service/)
+APPS_DIR = ROOT_DIR.path('gnosis_safe_push_service')
 
+env = environ.Env()
+
+READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=False)
+if READ_DOT_ENV_FILE:
+    # OS environment variables take precedence over variables from .env
+    env.read_env(str(ROOT_DIR.path('.env')))
+
+# GENERAL
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#debug
+DEBUG = env.bool('DJANGO_DEBUG', False)
+# Local time zone. Choices are
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# though not all of them may be available with every OS.
+# In Windows, this must be set to your system time zone.
 TIME_ZONE = 'UTC'
+# https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 LANGUAGE_CODE = 'en-us'
+# https://docs.djangoproject.com/en/dev/ref/settings/#site-id
+SITE_ID = 1
+# https://docs.djangoproject.com/en/dev/ref/settings/#use-i18n
+USE_I18N = True
+# https://docs.djangoproject.com/en/dev/ref/settings/#use-l10n
+USE_L10N = True
+# https://docs.djangoproject.com/en/dev/ref/settings/#use-tz
 USE_TZ = True
 
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#site-id
-# SITE_ID = 1
+# DATABASES
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#databases
+DATABASES = {
+    'default': env.db('DATABASE_URL'),
+}
+DATABASES['default']['ATOMIC_REQUESTS'] = True
 
-DEBUG = False
+# URLS
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
+ROOT_URLCONF = 'config.urls'
+# https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
+WSGI_APPLICATION = 'config.wsgi.application'
 
-ROOT_DIR = environ.Path(__file__) - 3  # (/a/b/myfile.py - 3 = /)
-APPS_DIR = ROOT_DIR.path('safe_service')
-
+# APPS
+# ------------------------------------------------------------------------------
 DJANGO_APPS = [
-    # Default Django apps:
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.messages',
     'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Admin
-    'django.contrib.admin',
-    'django.contrib.admindocs',
-]
+    # 'django.contrib.humanize', # Handy template tags
 
+]
 THIRD_PARTY_APPS = [
-    'django_filters',
-    'corsheaders',
     'rest_framework',
-    'rest_framework_swagger'
 ]
-
-GNOSIS_APPS = [
-    'django_google_authenticator'
-]
-
 LOCAL_APPS = [
-    'safe_service.safe',
-    'safe_service.relationaldb',
-    'safe_service.restapi'
+    # Custom apps go here
+    'gnosis_safe_push_service',
+    'gnosis_safe_push_service.safe',
 ]
+# https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + GNOSIS_APPS + LOCAL_APPS
-
-
+# MIDDLEWARE
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,59 +84,52 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.admindocs.middleware.XViewMiddleware',
 ]
 
-LOGGING = {
-    'version': 1,
-    # 'disable_existing_loggers': False,
-    # 'formatters': {
-    #    'verbose': {
-    #        'format': '%(levelname)s %(asctime)s %(module)s '
-    #                  '%(process)d %(thread)d %(message)s'
-    #    },
-    # },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-        }
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO'
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'mail_admins'],
-            'propagate': True,
-            'level': 'ERROR'
-        }
-    }
-}
+# STATIC
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#static-root
+STATIC_ROOT = str(ROOT_DIR('staticfiles'))
+# https://docs.djangoproject.com/en/dev/ref/settings/#static-url
+STATIC_URL = '/static/'
+# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
+STATICFILES_DIRS = [
+    str(APPS_DIR.path('static')),
+]
+# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
+# MEDIA
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#media-root
+MEDIA_ROOT = str(APPS_DIR('media'))
+# https://docs.djangoproject.com/en/dev/ref/settings/#media-url
+MEDIA_URL = '/media/'
+
+# TEMPLATES
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#templates
 TEMPLATES = [
     {
-        # See: https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATES-BACKEND
+        # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATES-BACKEND
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
+        # https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
         'DIRS': [
             str(APPS_DIR.path('templates')),
         ],
         'OPTIONS': {
-            # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-debug
+            # https://docs.djangoproject.com/en/dev/ref/settings/#template-debug
             'debug': DEBUG,
-            # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
+            # https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
             # https://docs.djangoproject.com/en/dev/ref/templates/api/#loader-types
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
             ],
-            # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-context-processors
+            # https://docs.djangoproject.com/en/dev/ref/settings/#template-context-processors
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
@@ -118,56 +139,65 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                # Your stuff: custom template context processors go here
             ],
         },
     },
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
-
-# STATIC FILE CONFIGURATION
+# FIXTURES
 # ------------------------------------------------------------------------------
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-STATIC_ROOT = os.environ.get('STATIC_ROOT', str(ROOT_DIR('staticfiles')))
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
-STATIC_URL = '/static/'
-
-# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = (
-    str(APPS_DIR.path('static')),
+# https://docs.djangoproject.com/en/dev/ref/settings/#fixture-dirs
+FIXTURE_DIRS = (
+    str(APPS_DIR.path('fixtures')),
 )
 
-# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
-)
+# EMAIL
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
+EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',                      # Or path to database file if using sqlite3.
-        'USER': 'postgres',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': 'db',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
+# ADMIN
+# ------------------------------------------------------------------------------
+# Django Admin URL regex.
+ADMIN_URL = r'^admin/'
+# https://docs.djangoproject.com/en/dev/ref/settings/#admins
+ADMINS = [
+    ("""Gnosis""", 'dev@gnosis.pm'),
+]
+# https://docs.djangoproject.com/en/dev/ref/settings/#managers
+MANAGERS = ADMINS
 
-ROOT_URLCONF = 'config.urls'
+# Celery
+# ------------------------------------------------------------------------------
+INSTALLED_APPS += ['gnosis_safe_push_service.taskapp.celery.CeleryConfig']
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-broker_url
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-result_backend
+if CELERY_BROKER_URL == 'django://':
+    CELERY_RESULT_BACKEND = 'redis://'
+else:
+    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-accept_content
+CELERY_ACCEPT_CONTENT = ['json']
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-task_serializer
+CELERY_TASK_SERIALIZER = 'json'
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-result_serializer
+CELERY_RESULT_SERIALIZER = 'json'
 
-WSGI_APPLICATION = 'config.wsgi.application'
-
-# Filtering
+# Django REST Framework
+# ------------------------------------------------------------------------------
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
     'DEFAULT_RENDERER_CLASSES': (
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
-    'PAGE_SIZE': 100,
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PARSER_CLASSES': (
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
+    ),
 }
+
+# SAFE
+
+ETH_HASH_PREFIX = env('ETH_HASH_PREFIX', default='gno')

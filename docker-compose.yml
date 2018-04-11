@@ -1,18 +1,21 @@
 version: '3'
 
+volumes:
+  nginx-shared:
+
 services:
   nginx:
-    image: nginx:1.13
+    image: nginx:1.13-alpine
     hostname: nginx
     ports:
       - "8000:8000"
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
-      - nginx-shared:/safe-nginx
+      - nginx-shared:/nginx
     depends_on:
       - web
   db:
-    image: postgres
+    image: postgres:10-alpine
     ports:
       - "5432:5432"
   web:
@@ -25,12 +28,9 @@ services:
       - db
     depends_on:
       - db
-    working_dir: /safe_service
-    command: scripts/run_web.sh
+    working_dir: /app
     ports:
       - "27017"
-      - "5432"
     volumes:
-      - nginx-shared:/safe-nginx
-volumes:
-  nginx-shared:
+      - nginx-shared:/nginx
+    command: docker/web/run_web.sh
