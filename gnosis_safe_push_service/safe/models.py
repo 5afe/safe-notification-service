@@ -1,5 +1,15 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from ethereum.utils import check_checksum
 from model_utils.models import TimeStampedModel
+
+
+def validate_checksumed_address(address):
+    if not check_checksum(address):
+        ValidationError(
+            _('%(address)s has an invalid checksum'),
+            params={'address': address},
+        )
 
 
 class Device(TimeStampedModel):
@@ -9,9 +19,10 @@ class Device(TimeStampedModel):
         verbose_name='push_token'
     )
     owner = models.CharField(
-        max_length=150,
+        max_length=42,
         primary_key=True,
-        verbose_name='onwer'
+        verbose_name='owner',
+        validators=[validate_checksumed_address],
     )
 
     class Meta:

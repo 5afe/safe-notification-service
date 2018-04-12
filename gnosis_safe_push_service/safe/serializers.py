@@ -1,10 +1,10 @@
-from django.utils.functional import cached_property
+from typing import Any, Dict, Tuple
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
-
-from .models import Device
+from gnosis_safe_push_service.safe.models import Device, DevicePair
 
 
 class SignatureSerializer(serializers.Serializer):
@@ -15,56 +15,73 @@ class SignatureSerializer(serializers.Serializer):
 
 class SignedMessageSerializer(serializers.Serializer):
     """
-    Inherit from this class and define hashed_fields property
+    Inherit from this class and define get_hashed_fields function
+    Take care not to define `message`, `message_hash` or `signing_address` fields
     """
     signature = SignatureSerializer()
 
-    @cached_property
-    def ethereum_signed_message(self) -> EthereumSignedMessage:
-        v = self.initial_data['signature']['v']
-        r = self.initial_data['signature']['r']
-        s = self.initial_data['signature']['s']
-        return EthereumSignedMessage(self.message, v, r, s)
+    def validate(self, data):
+        v = data['signature']['v']
+        r = data['signature']['r']
+        s = data['signature']['s']
+        message = ''.join(self.get_hashed_fields(data))
+        ethereum_signed_message = EthereumSignedMessage(message, v, r, s)
+        data['message'] = message
+        data['message_hash'] = ethereum_signed_message.message_hash
+        data['signing_address'] = ethereum_signed_message.get_signing_address()
+        return data
 
-    @property
-    def hashed_fields(self):
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         """
         :return: fields to concatenate for hash calculation
-        :rtype: tuple(str)
+        :rtype: Tuple[str]
         """
         return ()
-
-    @property
-    def message(self) -> bytes:
-        return ''.join([self.initial_data[hashed_field] for hashed_field in self.hashed_fields])
-
-    @property
-    def message_hash(self) -> bytes:
-        return self.ethereum_signed_message.message_hash
-
-    @property
-    def signing_address(self) -> str:
-        return self.ethereum_signed_message.get_signing_address()
-
-    def validate(self, data):
-        if int(self.ethereum_signed_message.get_signing_address(), 16):
-            return super().validate(data)
-        else:  # 0x0 address
-            raise ValidationError("Signed message is not valid, signer is ZERO address")
 
 
 class AuthSerializer(SignedMessageSerializer):
     push_token = serializers.CharField()
 
-    @property
-    def hashed_fields(self):
-        return 'push_token',
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['push_token'],
 
     def create(self, validated_data):
-        owner = self.signing_address
-
         instance, _ = Device.objects.update_or_create(
             push_token=validated_data['push_token'],
-            owner=owner
+            owner=validated_data['signing_address']
         )
+        return instance
+
+
+class TemporaryAuthorizationSerializer(SignedMessageSerializer):
+    expiration_date = serializers.DateTimeField()
+    connection_type = serializers.CharField()
+
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['expiration_date'].isoformat(), data['connection_type']
+
+
+class PairingSerializer(SignedMessageSerializer):
+    temporary_authorization = TemporaryAuthorizationSerializer()
+
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['temporary_authorization']['signing_address'],
+
+    def create(self, validated_data):
+        chrome_extension_address = validated_data['temporary_authorization']['signing_address']
+        owner = validated_data['signing_address']
+
+        chrome_device = Device.objects.get(owner=chrome_extension_address)
+        owner_device = Device.objects.get(owner=owner)
+
+        instance, _ = DevicePair.objects.update_or_create(
+            authorizing_device=owner_device,
+            authorized_device=chrome_device,
+        )
+
+        _, _ = DevicePair.objects.update_or_create(
+            authorizing_device=chrome_device,
+            authorized_device=owner_device,
+        )
+
         return instance
