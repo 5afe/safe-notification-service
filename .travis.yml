@@ -7,8 +7,6 @@ env:
   global:
   - DATABASE_URL=psql://postgres@localhost/travisci
   - PIP_USE_MIRRORS=true
-  - secure: yOpE1RMVuQTednR1UfzzJnDHC+mLJMCXqVfDtRbHr+hhRRP0NoSqQKYQGlV2ssU/qtzYCzlEDc64UxjLtBoWh+Fn5FgXIsWIeY99ygDWIG3rN1lwGfq5mnb3eZO2dPxzWQeS/4lXzwNlwVr/L3Fd2nJWM32B127UvQimzF1xedvHSTOHOpjsL97cvyPnVDIqzImnEHrhfIBzZ/V5aHaAInr2pdwmE7GsMBWubNnjEH3PlbRcZPiWpegpqa0xBtrK671vNnhhyDlhxvXGQ3Oerv+WhjPoGdhY6qar0glDF/wqFUFE4zWknrYORFubUIQb9J0zoFzTFzCnjJpGD4ADnRYHPUTv83EXJ/kgD7fFg/8pSn1fVaPo6dk6A8KlaxI3lNNcfI1KDcY/wpfZa9sck+7+mmTabamvPGRZHw8vH3hKFTFDTVRmolHFHAO0QEL75YmJbZjEu9hoWVlS7Ok9GToIGsN5m7sKXK/US8SUhSnx28QwgMUhpyzwog0Ub0d9SQlNRV1b17u6+PmpRXUdt6/hyxKp2d7hAOf6TYgbvVp5QH0NvIwpjrw3kB/iwZEyxOtJqAgzTV+0eiACJAy0lQFOWzftI7zhmMZQzyfFr/PLfsXIvoLfkyxkzJs71gEerqs+9RhMkMWUVcidGXnkBNC65szqjMy+KgEkz82kpb4=
-  - secure: b9n8bMq6ytP4j9MCeDXu8W2cTUE6XrtKfzHwWrrgRXfl9g/ADfXtyr0LpO9HE7uzq+QovGc6fQe4DyBrbGXHKFxzaseghF+cV+iwpGligeGOggsC6P8GZ/8Ra8vxwTxL2c4ZoUCkuWuHaDiiFH5fvc8Dm2rU8v8h16aCeg3hUGZgm+pPamR4e4BWKsWRaKAqEYbwZdPyivHQQBRWMPklzqipQx85fV6CDwxzOVbPohBURZpFD64PBSIjXmlV2OYVNFdNZvcs0vLVaMzHOufi2eDoeLYOWQAW4zOU/3wrCAtBn1fdULOxN4Epskp203H1ulyKgSudkNsA0e/u0ZfnZEdDn7BPomwUyOyO2hZuHwYobI3hjY7NN5jp+enu7h/nhUdX6ZiqUT/+T3EIJRbNypB6zOoNux1JpyyaONC7F+r1KWXuYOsMbrNvG2JYQnGB/5z0TL11FNmdmJ6uoGF2+e1Eg4LaYS4trkW6M5hDUGUQTB8Sa8SBfJ0gBJ4ff7NV0PgBV2xNTxyzW+XUtZlkCs/+YO96H8LsZFxMponfm7kv7M2vDc/0oa65arFbWuicgeqJnbURM+bPococyAiVpblbemyjH2FUUsj+O3nLAdj59BeXO68/anAz3Y5bOhqOolSr2eLe9No861GzjLgDSg93mjxn1SDn2cbc/b4o+7U=
 services:
 - postgresql
 before_script:
@@ -20,11 +18,17 @@ script:
 - coverage run --source=gnosis-safe-push-service manage.py test --settings=config.settings.test
 after_success:
 - coveralls
-- if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then if [ "$TRAVIS_BRANCH" == "master"
-  ]; then docker build -t gnosis-safe-push-service -f docker/web/Dockerfile .; docker
-  login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"; docker tag gnosis-safe-push-service
-  gnosispm/gnosis-safe-push-service:staging; docker push gnosispm/gnosis-safe-push-service:staging;
-  elif [ "$TRAVIS_BRANCH" == "develop" ]; then docker build -t gnosis-safe-push-service
-  -f docker/web/Dockerfile .; docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-  docker tag gnosis-safe-push-service gnosispm/gnosis-safe-push-service:develop; docker
-  push gnosispm/gnosis-safe-push-service:develop; fi fi
+- # Create Docker image if branch master or develop and not on pull requests
+  if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker build -t gnosis-safe-push-service -f docker/web/Dockerfile .;
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+      docker tag gnosis-safe-push-service gnosispm/gnosis-safe-push-service:staging;
+      docker push gnosispm/gnosis-safe-push-service:staging;
+    elif [ "$TRAVIS_BRANCH" == "develop" ]; then
+      docker build -t gnosis-safe-push-service -f docker/web/Dockerfile .;
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+      docker tag gnosis-safe-push-service gnosispm/gnosis-safe-push-service:develop;
+      docker push gnosispm/gnosis-safe-push-service:develop;
+    fi
+  fi
