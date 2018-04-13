@@ -4,9 +4,15 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.views import defaults as default_views
+from .swagger import get_swagger_view
+
+
+schema_view = get_swagger_view(title='Gnosis SAFE API')
+
 
 urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
+    url(r'^$', schema_view),
     url(settings.ADMIN_URL, admin.site.urls),
     url(r'^api/', include('safe.urls', namespace='api')),
     url(r'^check/', lambda request: HttpResponse("Ok")),
