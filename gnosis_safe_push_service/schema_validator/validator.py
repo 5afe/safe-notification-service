@@ -1,16 +1,21 @@
 from jsonschema.exceptions import ValidationError
-from jsonschema import Draft4Validator, validators
+from jsonschema import Draft4Validator, validators, validate
+from gnosis_safe_push_service.safe.utils import singleton
 import datetime
 import json
 
 
+@singleton
 class Validator(object):
     """JSON Schema Validator class"""
 
     def __init__(self, base_path='schemas'):
-        self.base_path = base_path
-        self.schema = None
-        self.custom_validator = None
+        if base_path[-1] != '/':
+            base_path = base_path + '/'
+
+        self._base_path = base_path
+        self._schema = None
+        self._custom_validator = None
 
     def load_schema(self, file_name):
         """Loads a JSON Schema
@@ -20,8 +25,11 @@ class Validator(object):
             IOError: if the file doesn't exists
             ValueError: if the json file isn't well formatted
         """
-        with open(self.base_path + '/' + file_name) as f:
-            self.schema = json.load(f)
+        if file_name[0] == '/':
+            file_name = file_name[1:]
+
+        with open(self._base_path + file_name) as f:
+            self._schema = json.load(f)
 
     def extend_validator(self, name):
         """Sets a custom validator extending a Draft4Validator
@@ -36,7 +44,7 @@ class Validator(object):
             raise Exception('%s validator is not available' % name)
         else:
             new_validators = {name: custom_validator}
-            self.custom_validator = validators.extend(Draft4Validator, new_validators)
+            self._custom_validator = validators.extend(Draft4Validator, new_validators)
 
     def get_custom_validator(self, name):
         """Returns a suitable jsonschema custom validator function
@@ -63,13 +71,16 @@ class Validator(object):
         Args:
             data: A dictionary
         Returns:
-            True for success, Exception otherwise.
+            Nothing for success, Exception otherwise.
         Raises:
             Exception: if schema is not provided
             jsonschema.exceptions.ValidationError: if data is cannot be validated
         """
-        if not self.schema:
+        if not self._schema:
             raise Exception('Schema dictionary not provided')
+        elif self._custom_validator:
+            # Validate returns nothing
+            self._custom_validator(self._schema).validate(data)
         else:
-            self.custom_validator(self.schema).validate(data)
-            return True
+            # Validate returns nothing
+            validate(data, self._schema)

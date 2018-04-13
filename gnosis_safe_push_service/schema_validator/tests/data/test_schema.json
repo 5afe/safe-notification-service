@@ -13,9 +13,9 @@
         "deployer": {
           "type": "string"
         }
-      }
-    },
-    "required": ["safe", "deployer"]
+      },
+      "required": ["safe", "deployer"]
+    }
   },
   "required": ["type", "params"]
 }
