@@ -1,6 +1,5 @@
 from firebase_admin import credentials, initialize_app, messaging
-
-from gnosis_safe_push_service.safe.utils import singleton
+from gnosis_safe_push_service.utils.singleton import singleton
 
 
 @singleton

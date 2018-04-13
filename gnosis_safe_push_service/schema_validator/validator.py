@@ -1,6 +1,6 @@
 from jsonschema.exceptions import ValidationError
 from jsonschema import Draft4Validator, validators, validate
-from gnosis_safe_push_service.safe.utils import singleton
+from gnosis_safe_push_service.utils.singleton import singleton
 import datetime
 import json
 
