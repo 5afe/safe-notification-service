@@ -1,9 +1,7 @@
 from __future__ import absolute_import
-# from jsonschema import Draft4Validator, validators
 from jsonschema.exceptions import ValidationError
 from gnosis_safe_push_service.schema_validator.validator import Validator
 from django.test import TestCase
-import json
 import os
 
 

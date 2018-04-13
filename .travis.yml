@@ -1,23 +1,34 @@
 language: python
 cache: pip
 python:
-  - "3.6"
+- '3.6'
 dist: trusty
 env:
   global:
-    - DATABASE_URL=psql://postgres@localhost/travisci
-    - PIP_USE_MIRRORS=true
-addons:
-  ssh_known_hosts:
-  - gnosisdb-kovan.gnosis.pm
+  - DATABASE_URL=psql://postgres@localhost/travisci
+  - PIP_USE_MIRRORS=true
 services:
-  - postgresql
+- postgresql
 before_script:
-  - psql -c 'create database travisci;' -U postgres
+- psql -c 'create database travisci;' -U postgres
 install:
-  - pip install -r requirements.txt
-  - pip install coveralls
+- pip install -r requirements.txt
+- pip install coveralls
 script:
-  - coverage run --source=gnosis-safe-push-service manage.py test --settings=config.settings.test
+- coverage run --source=gnosis-safe-push-service manage.py test --settings=config.settings.test
 after_success:
 - coveralls
+- # Create Docker image if branch master or develop and not on pull requests
+  if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker build -t gnosis-safe-push-service -f docker/web/Dockerfile .;
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+      docker tag gnosis-safe-push-service gnosispm/gnosis-safe-push-service:staging;
+      docker push gnosispm/gnosis-safe-push-service:staging;
+    elif [ "$TRAVIS_BRANCH" == "develop" ]; then
+      docker build -t gnosis-safe-push-service -f docker/web/Dockerfile .;
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+      docker tag gnosis-safe-push-service gnosispm/gnosis-safe-push-service:develop;
+      docker push gnosispm/gnosis-safe-push-service:develop;
+    fi
+  fi
