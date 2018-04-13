@@ -28,7 +28,7 @@ class TestViews(APITestCase):
 
         request = self.client.post(reverse('api:auth-creation'), data=json.dumps(auth_data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_200_OK)
+        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
 
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, push_token)
 
@@ -59,6 +59,6 @@ class TestViews(APITestCase):
         request = self.client.post(reverse('api:pairing-creation'),
                                    data=json.dumps(data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_200_OK)
+        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
 
         self.assertEquals(DevicePair.objects.count(), 2)
