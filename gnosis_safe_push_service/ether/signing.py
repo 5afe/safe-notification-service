@@ -25,7 +25,7 @@ class EthereumSignedMessage:
         self.r = int(r)
         self.s = int(s)
 
-    def calculate_hash(self, message):
+    def calculate_hash(self, message: str) -> bytes:
         return utils.sha3(self.hash_prefix + message)
 
     def check_message_hash(self, message: str) -> bool:

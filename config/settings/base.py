@@ -67,9 +67,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_swagger',
 ]
 LOCAL_APPS = [
-    # Custom apps go here
-    'gnosis_safe_push_service',
-    'gnosis_safe_push_service.safe',
+    'gnosis_safe_push_service.safe.apps.SafeConfig',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -201,4 +199,4 @@ REST_FRAMEWORK = {
 
 # SAFE
 
-ETH_HASH_PREFIX = env('ETH_HASH_PREFIX', default='gno')
+ETH_HASH_PREFIX = env('ETH_HASH_PREFIX', default='GNO')
