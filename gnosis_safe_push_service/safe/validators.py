@@ -1,22 +1,10 @@
-from json import loads
-
 from django.core.exceptions import ValidationError
+from ethereum.utils import check_checksum
 
 
-def validate_numeric_dictionary(value):
-    if value is None or len(value) == 0:
-        return
-
-    try:
-        obj = loads(value)
-    except Exception:
-        raise ValidationError("Field is not a valid JSON object.")
-
-    if not isinstance(obj, dict):
-        raise ValidationError("Field is not a dictionary.")
-
-    for key in obj:
-        if not key.isdigit():
-            raise ValidationError("Field contains non-numeric indices.")
-        elif not isinstance(obj[key], int):
-            raise ValidationError("Field contains non-numeric values.")
+def validate_checksumed_address(address):
+    if not check_checksum(address):
+        raise ValidationError(
+            '%(address)s has an invalid checksum',
+            params={'address': address},
+        )

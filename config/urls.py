@@ -4,8 +4,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.views import defaults as default_views
-from .swagger import get_swagger_view
 
+from .swagger import get_swagger_view
 
 schema_view = get_swagger_view(title='Gnosis SAFE API')
 

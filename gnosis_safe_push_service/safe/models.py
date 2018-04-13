@@ -1,15 +1,7 @@
-from django.core.exceptions import ValidationError
 from django.db import models
-from ethereum.utils import check_checksum
 from model_utils.models import TimeStampedModel
 
-
-def validate_checksumed_address(address):
-    if not check_checksum(address):
-        ValidationError(
-            _('%(address)s has an invalid checksum'),
-            params={'address': address},
-        )
+from .validators import validate_checksumed_address
 
 
 class Device(TimeStampedModel):
