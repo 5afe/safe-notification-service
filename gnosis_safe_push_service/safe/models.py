@@ -5,9 +5,7 @@ from .validators import validate_checksumed_address
 
 
 class Device(TimeStampedModel):
-    push_token = models.CharField(
-        max_length=150,
-        unique=True,
+    push_token = models.TextField(
         verbose_name='push_token'
     )
     owner = models.CharField(
