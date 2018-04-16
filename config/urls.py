@@ -11,12 +11,10 @@ schema_view = get_swagger_view(title='Gnosis SAFE API')
 
 
 urlpatterns = [
-    # Django Admin, use {% url 'admin:index' %}
     url(r'^$', schema_view),
     url(settings.ADMIN_URL, admin.site.urls),
-    url(r'^api/', include('safe.urls', namespace='api')),
-    url(r'^check/', lambda request: HttpResponse("Ok")),
-    # User management
+    url(r'^api/v1/', include('safe.urls', namespace='v1')),
+    url(r'^check/', lambda request: HttpResponse("Ok"), name='check'),
 ]
 
 if settings.DEBUG:

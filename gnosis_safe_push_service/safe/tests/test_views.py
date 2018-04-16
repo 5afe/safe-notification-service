@@ -26,14 +26,14 @@ class TestViews(APITestCase):
             'signature': signature
         }
 
-        request = self.client.post(reverse('api:auth-creation'), data=json.dumps(auth_data),
+        request = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_201_CREATED)
 
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, push_token)
 
     def test_auth_fail(self):
-        request = self.client.post(reverse('api:auth-creation'), data=json.dumps({}),
+        request = self.client.post(reverse('v1:auth-creation'), data=json.dumps({}),
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -56,7 +56,7 @@ class TestViews(APITestCase):
         Device.objects.create(push_token=faker.name(), owner=chrome_address)
         Device.objects.create(push_token=faker.name(), owner=device_address)
 
-        request = self.client.post(reverse('api:pairing-creation'),
+        request = self.client.post(reverse('v1:pairing-creation'),
                                    data=json.dumps(data),
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_201_CREATED)
