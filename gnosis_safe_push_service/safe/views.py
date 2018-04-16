@@ -1,9 +1,22 @@
+from django.conf import settings
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from gnosis_safe_push_service.version import __version__
+
 from .serializers import AuthSerializer, PairingSerializer
+
+
+def about_view(_):
+    return JsonResponse({
+        'version': __version__,
+        'settings': {
+            'ETH_HASH_PREFIX ': settings.ETH_HASH_PREFIX,
+        }
+    })
 
 
 class AuthCreationView(CreateAPIView):
