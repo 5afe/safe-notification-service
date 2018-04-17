@@ -67,13 +67,11 @@ class TestViews(APITestCase):
         device_address, device_key = get_eth_address_with_key()
 
         expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
-        connection_type = 'mobile'
 
         data = {
             "temporary_authorization": {
                 "expiration_date": expiration_date,
-                "connection_type": connection_type,
-                "signature": get_signature_json(expiration_date + connection_type, chrome_key),
+                "signature": get_signature_json(expiration_date, chrome_key),
             },
             "signature": get_signature_json(chrome_address, device_key)
         }
@@ -96,3 +94,8 @@ class TestViews(APITestCase):
                                      content_type='application/json')
 
         self.assertEquals(request.status_code, status.HTTP_204_NO_CONTENT)
+        with self.assertRaises(DevicePair.DoesNotExist):
+            DevicePair.objects.get(authorizing_device__owner=device_address)
+
+        with self.assertRaises(DevicePair.DoesNotExist):
+            DevicePair.objects.get(authorized_device__owner=device_address)
