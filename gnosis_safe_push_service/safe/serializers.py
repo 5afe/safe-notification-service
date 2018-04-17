@@ -8,6 +8,10 @@ from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
 
 
+def isoformat_without_ms(date_time):
+    return date_time.replace(microsecond=0).isoformat()
+
+
 class SignatureSerializer(serializers.Serializer):
     v = serializers.IntegerField(min_value=0, max_value=30)
     r = serializers.IntegerField(min_value=0)
@@ -63,7 +67,7 @@ class TemporaryAuthorizationSerializer(SignedMessageSerializer):
         return value
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
-        return data['expiration_date'].isoformat()
+        return isoformat_without_ms(data['expiration_date'])
 
 
 class PairingSerializer(SignedMessageSerializer):

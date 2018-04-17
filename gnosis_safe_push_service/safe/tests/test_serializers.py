@@ -9,7 +9,7 @@ from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..serializers import AuthSerializer, PairingSerializer, PairingDeletionSerializer
+from ..serializers import AuthSerializer, PairingSerializer, PairingDeletionSerializer, isoformat_without_ms
 from .factories import get_bad_signature, get_signature_json
 
 faker = Faker()
@@ -52,7 +52,7 @@ class TestSerializers(TestCase):
         chrome_address, chrome_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
 
-        expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
+        expiration_date = isoformat_without_ms((timezone.now() + timedelta(days=2)))
 
         data = {
             "temporary_authorization": {
@@ -72,7 +72,7 @@ class TestSerializers(TestCase):
         self.assertEqual(device_address, pairing_serializer.validated_data['signing_address'])
 
         # Test expiration date exceeded
-        expiration_date = (timezone.now() - timedelta(days=2)).isoformat()
+        expiration_date = isoformat_without_ms(timezone.now() - timedelta(days=2))
         data['temporary_authorization']['expiration_date'] = expiration_date
         data['temporary_authorization']['signature'] = get_signature_json(expiration_date, chrome_key)
 

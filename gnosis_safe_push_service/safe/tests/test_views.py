@@ -12,6 +12,7 @@ from gnosis_safe_push_service.ether.tests.factories import \
 
 from ..models import Device, DevicePair
 from .factories import get_signature_json
+from ..serializers import isoformat_without_ms
 
 faker = Faker()
 
@@ -42,7 +43,7 @@ class TestViews(APITestCase):
         chrome_address, chrome_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
 
-        expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
+        expiration_date = isoformat_without_ms(timezone.now() + timedelta(days=2))
 
         data = {
             "temporary_authorization": {
@@ -66,7 +67,7 @@ class TestViews(APITestCase):
         chrome_address, chrome_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
 
-        expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
+        expiration_date = isoformat_without_ms(timezone.now() + timedelta(days=2))
 
         data = {
             "temporary_authorization": {
