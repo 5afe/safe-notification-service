@@ -53,13 +53,11 @@ class TestSerializers(TestCase):
         device_address, device_key = get_eth_address_with_key()
 
         expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
-        connection_type = 'mobile'
 
         data = {
             "temporary_authorization": {
                 "expiration_date": expiration_date,
-                "connection_type": connection_type,
-                "signature": get_signature_json(expiration_date + connection_type, chrome_key),
+                "signature": get_signature_json(expiration_date, chrome_key),
             },
             "signature":  get_signature_json(chrome_address, device_key)
         }
@@ -74,7 +72,10 @@ class TestSerializers(TestCase):
         self.assertEqual(device_address, pairing_serializer.validated_data['signing_address'])
 
         # Test expiration date exceeded
-        data['temporary_authorization']['expiration_date'] = (timezone.now() - timedelta(days=2)).isoformat()
+        expiration_date = (timezone.now() - timedelta(days=2)).isoformat()
+        data['temporary_authorization']['expiration_date'] = expiration_date
+        data['temporary_authorization']['signature'] = get_signature_json(expiration_date, chrome_key)
+
         pairing_serializer = PairingSerializer(data=data)
         self.assertFalse(pairing_serializer.is_valid())
         self.assertTrue('expiration_date' in pairing_serializer.errors['temporary_authorization'])

@@ -43,13 +43,11 @@ class TestViews(APITestCase):
         device_address, device_key = get_eth_address_with_key()
 
         expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
-        connection_type = 'mobile'
 
         data = {
             "temporary_authorization": {
                 "expiration_date": expiration_date,
-                "connection_type": connection_type,
-                "signature": get_signature_json(expiration_date + connection_type, chrome_key),
+                "signature": get_signature_json(expiration_date, chrome_key),
             },
             "signature": get_signature_json(chrome_address, device_key)
         }
