@@ -57,9 +57,44 @@ class TestViews(APITestCase):
         Device.objects.create(push_token=faker.name(), owner=chrome_address)
         Device.objects.create(push_token=faker.name(), owner=device_address)
 
-        request = self.client.post(reverse('v1:pairing-creation'),
+        request = self.client.post(reverse('v1:pairing'),
                                    data=json.dumps(data),
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_201_CREATED)
 
         self.assertEquals(DevicePair.objects.count(), 2)
+
+    def test_pairing_deletion(self):
+        chrome_address, chrome_key = get_eth_address_with_key()
+        device_address, device_key = get_eth_address_with_key()
+
+        expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
+        connection_type = 'mobile'
+
+        data = {
+            "temporary_authorization": {
+                "expiration_date": expiration_date,
+                "connection_type": connection_type,
+                "signature": get_signature_json(expiration_date + connection_type, chrome_key),
+            },
+            "signature": get_signature_json(chrome_address, device_key)
+        }
+
+        Device.objects.create(push_token=faker.name(), owner=chrome_address)
+        Device.objects.create(push_token=faker.name(), owner=device_address)
+
+        request = self.client.post(reverse('v1:pairing'),
+                                   data=json.dumps(data),
+                                   content_type='application/json')
+        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+
+        deletion_data = {
+            'device': device_address,
+            'signature': get_signature_json(device_address, device_key)
+        }
+
+        request = self.client.delete(reverse('v1:pairing'),
+                                     data=json.dumps(deletion_data),
+                                     content_type='application/json')
+
+        self.assertEquals(request.status_code, status.HTTP_204_NO_CONTENT)

@@ -9,7 +9,7 @@ from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..serializers import AuthSerializer, PairingSerializer
+from ..serializers import AuthSerializer, PairingSerializer, PairingDeletionSerializer
 from .factories import get_bad_signature, get_signature_json
 
 faker = Faker()
@@ -78,3 +78,13 @@ class TestSerializers(TestCase):
         pairing_serializer = PairingSerializer(data=data)
         self.assertFalse(pairing_serializer.is_valid())
         self.assertTrue('expiration_date' in pairing_serializer.errors['temporary_authorization'])
+
+    def test_pairing_deletion_serializer(self):
+        device_address, device_key = get_eth_address_with_key()
+
+        deletion_data = {
+            'device': device_address,
+            'signature': get_signature_json(device_address, device_key)
+        }
+        remove_pairing = PairingDeletionSerializer(data=deletion_data)
+        self.assertTrue(remove_pairing.is_valid())
