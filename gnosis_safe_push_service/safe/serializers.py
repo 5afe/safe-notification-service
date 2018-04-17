@@ -56,7 +56,6 @@ class AuthSerializer(SignedMessageSerializer):
 
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
     expiration_date = serializers.DateTimeField()
-    connection_type = serializers.CharField()
 
     def validate_expiration_date(self, value):
         if timezone.now() > value:
@@ -64,7 +63,7 @@ class TemporaryAuthorizationSerializer(SignedMessageSerializer):
         return value
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
-        return data['expiration_date'].isoformat(), data['connection_type']
+        return data['expiration_date'].isoformat()
 
 
 class PairingSerializer(SignedMessageSerializer):
