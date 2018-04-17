@@ -1,5 +1,6 @@
 from typing import Any, Dict, Tuple
 
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -56,6 +57,11 @@ class AuthSerializer(SignedMessageSerializer):
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
     expiration_date = serializers.DateTimeField()
     connection_type = serializers.CharField()
+
+    def validate_expiration_date(self, value):
+        if timezone.now() > value:
+            raise ValidationError("Exceeded expiration date")
+        return value
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['expiration_date'].isoformat(), data['connection_type']

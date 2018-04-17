@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 
 from django.urls import reverse
 from django.utils import timezone
@@ -41,7 +42,7 @@ class TestViews(APITestCase):
         chrome_address, chrome_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
 
-        expiration_date = timezone.now().isoformat()
+        expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
         connection_type = 'mobile'
 
         data = {
