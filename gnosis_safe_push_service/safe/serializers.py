@@ -91,3 +91,13 @@ class PairingSerializer(SignedMessageSerializer):
         )
 
         return instance
+
+
+class PairingDeletionSerializer(SignedMessageSerializer):
+    device = serializers.CharField()
+
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['device']
+
+
+

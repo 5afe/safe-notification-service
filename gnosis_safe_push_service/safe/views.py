@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
@@ -8,7 +9,8 @@ from rest_framework.views import APIView
 
 from gnosis_safe_push_service.version import __version__
 
-from .serializers import AuthSerializer, PairingSerializer
+from .serializers import AuthSerializer, PairingSerializer, PairingDeletionSerializer
+from gnosis_safe_push_service.safe.models import DevicePair
 
 
 class AboutView(APIView):
@@ -38,14 +40,28 @@ class AuthCreationView(CreateAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
 
-class PairingCreationView(CreateAPIView):
+class PairingView(APIView):
     permission_classes = (AllowAny,)
-    serializer_class = PairingSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = PairingSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
+
+    def delete(self, request, *args, **kwargs):
+        serializer = PairingDeletionSerializer(data=request.data)
+        if serializer.is_valid():
+            signer_address = serializer.validated_data['signing_address']
+            device_address = serializer.validated_data['device']
+
+            pairings = DevicePair.objects.filter(
+                (Q(authorizing_device__owner=signer_address) | Q(authorized_device__owner=device_address))
+            )
+
+            pairings.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
