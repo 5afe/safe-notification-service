@@ -1,16 +1,25 @@
 from datetime import datetime
 from typing import Any, Dict, Tuple
+from ethereum.utils import checksum_encode
 
 from django.utils import timezone
+from django.conf import settings
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
+from gnosis_safe_push_service.firebase.client import FirebaseClient
 
 
 def isoformat_without_ms(date_time):
     return date_time.replace(microsecond=0).isoformat()
+
+
+# ================================================ #
+#                Base Serializers
+# ================================================ #
 
 
 class SignatureSerializer(serializers.Serializer):
@@ -19,6 +28,35 @@ class SignatureSerializer(serializers.Serializer):
     s = serializers.IntegerField(min_value=0)
 
 
+# ================================================ #
+#                Custom Fields
+# ================================================ #
+class EthereumAddressField(serializers.Field):
+    """
+    Ethereum address checksumed
+    https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
+    """
+
+    def to_representation(self, obj):
+        return obj
+
+    def to_internal_value(self, data):
+        # Check if address is valid
+
+        try:
+            if checksum_encode(data) != data:
+                raise ValueError
+        except ValueError:
+            raise ValidationError("Address %s is not checksumed" % data)
+        except Exception:
+            raise ValidationError("Address %s is not valid" % data)
+
+        return data
+
+
+# ================================================ #
+#                 Serializers
+# ================================================ #
 class SignedMessageSerializer(serializers.Serializer):
     """
     Inherit from this class and define get_hashed_fields function
@@ -27,6 +65,7 @@ class SignedMessageSerializer(serializers.Serializer):
     signature = SignatureSerializer()
 
     def validate(self, data):
+        super().validate(data)
         v = data['signature']['v']
         r = data['signature']['r']
         s = data['signature']['s']
@@ -120,3 +159,38 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['device']
+
+
+class NotificationSerializer(SignedMessageSerializer):
+    devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
+    message = serializers.CharField()
+
+    def validate(self, data):
+        super().validate(data)
+        devices = data['devices']
+        if len(set(devices)) != len(devices):
+            raise ValidationError("Duplicated addresses are forbidden")
+
+        signing_address = data['signing_address']
+        if signing_address in devices:
+            raise ValidationError("Signing address cannot be in the destination addresses")
+
+        return data
+
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['message']
+
+    def create(self, validated_data):
+        signer_address = validated_data['signing_address']
+        devices = validated_data['devices']
+
+        pairings = DevicePair.objects.filter(
+            (Q(authorizing_device__owner__in=devices) & Q(authorized_device__owner=signer_address))
+        ).select_related('authorizing_device')
+
+        # Firebase client
+        client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
+
+        for pairing in pairings:
+            # Send firebase notification
+            client.send_message(validated_data['message'], pairing.authorizing_device.push_token)

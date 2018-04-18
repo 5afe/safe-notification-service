@@ -11,7 +11,7 @@ from gnosis_safe_push_service.safe.models import DevicePair
 from gnosis_safe_push_service.version import __version__
 
 from .serializers import (AuthSerializer, PairingDeletionSerializer,
-                          PairingSerializer)
+                          PairingSerializer, NotificationSerializer)
 
 
 class AboutView(APIView):
@@ -63,6 +63,19 @@ class PairingView(APIView):
             )
 
             pairings.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
+
+
+class NotificationView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = NotificationSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
