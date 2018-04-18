@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, Tuple
+from web3.utils.validation import validate_address
 
 from django.utils import timezone
 from rest_framework import serializers
@@ -33,6 +34,18 @@ class SignatureSerializer(serializers.Serializer):
 class DevicesField(serializers.Field):
     """ Represents a list of devices with their addresses """
     def to_internal_value(self, data):
+        if not isinstance(data, list):
+            raise ValidationError('Devices must be a list of addresses')
+        elif len(data) == 0:
+            raise ValidationError('Devices must contain one address at least')
+
+        # validate fields
+        for address in data:
+            try:
+                validate_address(address)
+            except:
+                raise ValidationError('Devices must be a list of checksum valid addresses')
+
         return data
 
 
@@ -146,9 +159,10 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 
 class NotificationSerializer(SignedMessageSerializer):
     devices = DevicesField()
+    message = serializers.CharField()
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
-        return data['']
+        return data
 
     def create(self, validated_data):
 

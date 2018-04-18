@@ -10,8 +10,9 @@ from gnosis_safe_push_service.ether.tests.factories import \
     get_eth_address_with_key
 
 from ..serializers import (AuthSerializer, PairingDeletionSerializer,
-                           PairingSerializer, isoformat_without_ms)
-from .factories import get_bad_signature, get_signature_json, get_auth_mock_data, get_pairing_mock_data
+                           PairingSerializer, NotificationSerializer, isoformat_without_ms)
+from .factories import (get_bad_signature, get_signature_json, get_auth_mock_data, get_pairing_mock_data,
+                        get_notification_mock_data)
 
 faker = Faker()
 
@@ -97,3 +98,12 @@ class TestSerializers(TestCase):
         }
         remove_pairing = PairingDeletionSerializer(data=deletion_data)
         self.assertTrue(remove_pairing.is_valid())
+
+    def test_notification_serializer(self):
+        notification_data = get_notification_mock_data()
+        serializer = NotificationSerializer(data=notification_data)
+        self.assertTrue(serializer.is_valid())
+
+        invalid_notification_data = get_notification_mock_data(devices=['0x0', '0x1'])
+        serializer = NotificationSerializer(data=invalid_notification_data)
+        self.assertFalse(serializer.is_valid())

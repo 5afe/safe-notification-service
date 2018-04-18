@@ -35,7 +35,7 @@ def get_bad_signature(message, key):
 
 
 def get_auth_mock_data(key, token=None):
-    """ Generates auth data """
+    """ Generates auth dictionary data """
     if not token:
         token = faker.name()
 
@@ -48,7 +48,7 @@ def get_auth_mock_data(key, token=None):
 
 
 def get_pairing_mock_data(expiration_date=None, chrome_key=None, chrome_address=None, device_key=None):
-    """ Generates a data for pairing purposes """
+    """ Generates a dictionary data for pairing purposes """
     if not expiration_date:
         expiration_date = isoformat_without_ms((timezone.now() + timedelta(days=2)))
     if not chrome_address or not chrome_key:
@@ -62,4 +62,20 @@ def get_pairing_mock_data(expiration_date=None, chrome_key=None, chrome_address=
             "signature": get_signature_json(expiration_date, chrome_key),
         },
         "signature":  get_signature_json(chrome_address, device_key)
+    }
+
+
+def get_notification_mock_data(devices=None):
+    """ Generates a dictionary data specifying a notification message """
+    message = faker.name()
+    eth_address, eth_key = get_eth_address_with_key()
+    other_eth_address, other_eth_key = get_eth_address_with_key()
+
+    if not devices:
+        devices = [eth_address, other_eth_address]
+
+    return {
+        'devices': devices,
+        'message': message,
+        'signature': get_signature_json(message, eth_key)
     }
