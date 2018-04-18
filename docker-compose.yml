@@ -34,3 +34,19 @@ services:
     volumes:
       - nginx-shared:/nginx
     command: docker/web/run_web.sh
+
+  redis:
+    image: redis:4-alpine
+
+  worker: &worker
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    env_file:
+      - .env
+    links:
+      - redis
+    depends_on:
+      - db
+      - redis
+    command: docker/web/celery/worker/run.sh
