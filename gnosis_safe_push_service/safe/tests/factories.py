@@ -69,13 +69,14 @@ def get_notification_mock_data(devices=None):
     """ Generates a dictionary data specifying a notification message """
     message = faker.name()
     eth_address, eth_key = get_eth_address_with_key()
-    other_eth_address, other_eth_key = get_eth_address_with_key()
+    eth_address2, _ = get_eth_address_with_key()
+    eth_address3, _ = get_eth_address_with_key()
 
     if not devices:
-        devices = [eth_address, other_eth_address]
+        devices = [eth_address2, eth_address3]
 
     return {
         'devices': devices,
         'message': message,
-        'signature': get_signature_json(message, eth_key)
+        'signature': get_signature_json(message, eth_key),
     }

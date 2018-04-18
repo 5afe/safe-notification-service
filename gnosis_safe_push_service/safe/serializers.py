@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict, Tuple
-from web3.utils.validation import validate_address
+from ethereum.utils import checksum_encode
 
 from django.utils import timezone
 from django.conf import settings
@@ -42,9 +42,13 @@ class EthereumAddressField(serializers.Field):
 
     def to_internal_value(self, data):
         # Check if address is valid
+
         try:
-            validate_address(data)
-        except:
+            if checksum_encode(data) != data:
+                raise ValueError
+        except ValueError:
+            raise ValidationError("Address %s is not checksumed" % data)
+        except Exception:
             raise ValidationError("Address %s is not valid" % data)
 
         return data
@@ -61,6 +65,7 @@ class SignedMessageSerializer(serializers.Serializer):
     signature = SignatureSerializer()
 
     def validate(self, data):
+        super().validate(data)
         v = data['signature']['v']
         r = data['signature']['r']
         s = data['signature']['s']
@@ -160,8 +165,20 @@ class NotificationSerializer(SignedMessageSerializer):
     devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
     message = serializers.CharField()
 
-    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+    def validate(self, data):
+        super().validate(data)
+        devices = data['devices']
+        if len(set(devices)) != len(devices):
+            raise ValidationError("Duplicated addresses are forbidden")
+
+        signing_address = data['signing_address']
+        if signing_address in devices:
+            raise ValidationError("Signing address cannot be in the destination addresses")
+
         return data
+
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['message']
 
     def create(self, validated_data):
         signer_address = validated_data['signing_address']
