@@ -76,6 +76,14 @@ class PairingSerializer(SignedMessageSerializer):
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['temporary_authorization']['signing_address'],
 
+    def validate(self, data):
+        super().validate(data)
+
+        if data['temporary_authorization']['signing_address'] == data['signing_address']:
+            raise ValidationError('Both signing addresses must be different')
+
+        return data
+
     def create(self, validated_data):
         chrome_extension_address = validated_data['temporary_authorization']['signing_address']
         owner = validated_data['signing_address']

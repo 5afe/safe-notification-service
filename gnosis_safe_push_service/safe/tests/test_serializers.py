@@ -80,6 +80,23 @@ class TestSerializers(TestCase):
         self.assertFalse(pairing_serializer.is_valid())
         self.assertTrue('expiration_date' in pairing_serializer.errors['temporary_authorization'])
 
+    def test_pairing_with_same_address(self):
+        eth_address, eth_key = get_eth_address_with_key()
+
+        expiration_date = isoformat_without_ms((timezone.now() + timedelta(days=2)))
+
+        data = {
+            "temporary_authorization": {
+                "expiration_date": expiration_date,
+                "signature": get_signature_json(expiration_date, eth_key),
+            },
+            "signature":  get_signature_json(eth_address, eth_key)
+        }
+
+        pairing_serializer = PairingSerializer(data=data)
+        self.assertFalse(pairing_serializer.is_valid())
+        self.assertTrue('non_field_errors' in pairing_serializer.errors)
+
     def test_pairing_deletion_serializer(self):
         device_address, device_key = get_eth_address_with_key()
 
