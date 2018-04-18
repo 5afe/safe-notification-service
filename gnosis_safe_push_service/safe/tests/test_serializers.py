@@ -107,3 +107,7 @@ class TestSerializers(TestCase):
         invalid_notification_data = get_notification_mock_data(devices=['0x0', '0x1'])
         serializer = NotificationSerializer(data=invalid_notification_data)
         self.assertFalse(serializer.is_valid())
+
+        invalid_notification_data['devices'] = []
+        serializer = NotificationSerializer(data=invalid_notification_data)
+        self.assertFalse(serializer.is_valid())

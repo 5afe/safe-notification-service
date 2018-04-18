@@ -1,4 +1,5 @@
 from datetime import datetime
+from ethereum.utils import checksum_encode
 from typing import Any, Dict, Tuple
 from web3.utils.validation import validate_address
 
@@ -25,26 +26,24 @@ class SignatureSerializer(serializers.Serializer):
     s = serializers.IntegerField(min_value=0)
 
 
-
 # ================================================ #
 #                Custom Fields
 # ================================================ #
+class EthereumAddressField(serializers.Field):
+    """
+    Ethereum address checksumed
+    https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
+    """
 
+    def to_representation(self, obj):
+        return obj
 
-class DevicesField(serializers.Field):
-    """ Represents a list of devices with their addresses """
     def to_internal_value(self, data):
-        if not isinstance(data, list):
-            raise ValidationError('Devices must be a list of addresses')
-        elif len(data) == 0:
-            raise ValidationError('Devices must contain one address at least')
-
-        # validate fields
-        for address in data:
-            try:
-                validate_address(address)
-            except:
-                raise ValidationError('Devices must be a list of checksum valid addresses')
+        # Check if address is valid
+        try:
+            validate_address(data)
+        except:
+            raise ValidationError("Address %s is not valid" % data)
 
         return data
 
@@ -52,8 +51,6 @@ class DevicesField(serializers.Field):
 # ================================================ #
 #                 Serializers
 # ================================================ #
-
-
 class SignedMessageSerializer(serializers.Serializer):
     """
     Inherit from this class and define get_hashed_fields function
@@ -158,12 +155,12 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 
 
 class NotificationSerializer(SignedMessageSerializer):
-    devices = DevicesField()
+    devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
     message = serializers.CharField()
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data
 
     def create(self, validated_data):
-
+        # TODO
         return None
