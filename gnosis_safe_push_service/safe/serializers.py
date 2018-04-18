@@ -185,12 +185,12 @@ class NotificationSerializer(SignedMessageSerializer):
         devices = validated_data['devices']
 
         pairings = DevicePair.objects.filter(
-            (Q(authorizing_device__owner=signer_address) | Q(authorized_device__owner=signer_address)) &
-            (Q(authorizing_device__owner__in=devices) | Q(authorized_device__owner__in=devices))
+            (Q(authorizing_device__owner__in=devices) & Q(authorized_device__owner=signer_address))
         )
 
-        if pairings.count() > 0:
-            client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
-            # client.send_message(validated_data['message'], validated_data[''])
+        # Firebase client
+        client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
 
-        return None
+        for pairing in pairings:
+            # Send firebase notification
+            client.send_message(validated_data['message'], pairing.authorizing.push_token)
