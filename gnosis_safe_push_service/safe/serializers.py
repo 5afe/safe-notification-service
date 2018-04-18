@@ -13,10 +13,32 @@ def isoformat_without_ms(date_time):
     return date_time.replace(microsecond=0).isoformat()
 
 
+# ================================================ #
+#                Base Serializers
+# ================================================ #
+
+
 class SignatureSerializer(serializers.Serializer):
     v = serializers.IntegerField(min_value=0, max_value=30)
     r = serializers.IntegerField(min_value=0)
     s = serializers.IntegerField(min_value=0)
+
+
+
+# ================================================ #
+#                Custom Fields
+# ================================================ #
+
+
+class DevicesField(serializers.Field):
+    """ Represents a list of devices with their addresses """
+    def to_internal_value(self, data):
+        return data
+
+
+# ================================================ #
+#                 Serializers
+# ================================================ #
 
 
 class SignedMessageSerializer(serializers.Serializer):
@@ -120,3 +142,14 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['device']
+
+
+class NotificationSerializer(SignedMessageSerializer):
+    devices = DevicesField()
+
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['']
+
+    def create(self, validated_data):
+
+        return None
