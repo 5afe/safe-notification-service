@@ -10,7 +10,8 @@ from rest_framework.exceptions import ValidationError
 
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
-from gnosis_safe_push_service.firebase.client import FirebaseClient
+# from gnosis_safe_push_service.firebase.client import FirebaseClient
+from gnosis_safe_push_service.safe.tasks import send_notification
 
 
 def isoformat_without_ms(date_time):
@@ -181,16 +182,18 @@ class NotificationSerializer(SignedMessageSerializer):
         return data['message']
 
     def create(self, validated_data):
+        """
+        Takes care of getting the valid device pairs for the signing user and
+        sends the notifications.
+        """
         signer_address = validated_data['signing_address']
         devices = validated_data['devices']
+        message = validated_data['message']
 
         pairings = DevicePair.objects.filter(
             (Q(authorizing_device__owner__in=devices) & Q(authorized_device__owner=signer_address))
         ).select_related('authorizing_device')
 
-        # Firebase client
-        client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
-
         for pairing in pairings:
-            # Send firebase notification
-            client.send_message(validated_data['message'], pairing.authorizing_device.push_token)
+            # Call celery task for sending notification
+            send_notification(message, pairing.authorizing_device.push_token)

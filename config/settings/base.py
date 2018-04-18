@@ -249,5 +249,12 @@ LOGGING = {
     }
 }
 
-# SAFE
+# Safe
+# ------------------------------------------------------------------------------
 ETH_HASH_PREFIX = env('ETH_HASH_PREFIX', default='GNO')
+
+
+# Firebase
+# ------------------------------------------------------------------------------
+FIREBASE_NOTIFICATION_RETRY_DELAY = 1 * 60 # 1 minute
+FIREBASE_MAX_NOTIFICATION_RETRIES = 3
