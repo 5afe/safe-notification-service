@@ -14,6 +14,7 @@ from ..serializers import (AuthSerializer, PairingDeletionSerializer,
 from .factories import (get_bad_signature, get_signature_json, get_auth_mock_data, get_pairing_mock_data,
                         get_notification_mock_data)
 
+
 faker = Faker()
 
 
@@ -104,10 +105,37 @@ class TestSerializers(TestCase):
         serializer = NotificationSerializer(data=notification_data)
         self.assertTrue(serializer.is_valid())
 
+        # Bad format
         invalid_notification_data = get_notification_mock_data(devices=['0x0', '0x1'])
         serializer = NotificationSerializer(data=invalid_notification_data)
         self.assertFalse(serializer.is_valid())
 
+        # Bad checksum
+        invalid_notification_data = get_notification_mock_data(devices=['0xBBc1069ba4806e632fd11fAc9336b1f9dbf074a90EEA861d0b79cf256127abF3',
+                                                                        '0xAAc1066ba4806e632fd11fBc9336b1f9dbf074a90ecc861d0b79cf256127ABF3'])
+        serializer = NotificationSerializer(data=invalid_notification_data)
+        self.assertFalse(serializer.is_valid())
+
+        # Duplicated addresses
+        address, _ = get_eth_address_with_key()
+        invalid_notification_data = get_notification_mock_data(devices=[address, address])
+        serializer = NotificationSerializer(data=invalid_notification_data)
+        self.assertFalse(serializer.is_valid())
+
+        # No addresses
         invalid_notification_data['devices'] = []
         serializer = NotificationSerializer(data=invalid_notification_data)
         self.assertFalse(serializer.is_valid())
+
+    def test_notification_serializer_sending_itself(self):
+        device_address, device_key = get_eth_address_with_key()
+        message = faker.name()
+
+        data = {
+            'devices': [device_address],
+            'message': message,
+            'signature': get_signature_json(message, device_key)
+        }
+
+        notification_serializer = NotificationSerializer(data=data)
+        self.assertFalse(notification_serializer.is_valid())
