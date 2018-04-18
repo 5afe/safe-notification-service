@@ -1,4 +1,5 @@
 from datetime import datetime
+from ethereum.utils import checksum_encode
 from typing import Any, Dict, Tuple
 
 from django.utils import timezone
@@ -24,23 +25,27 @@ class SignatureSerializer(serializers.Serializer):
     s = serializers.IntegerField(min_value=0)
 
 
-
 # ================================================ #
 #                Custom Fields
 # ================================================ #
+class EthereumAddressField(serializers.Field):
+    """
+    Ethereum address checksumed
+    https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
+    """
 
+    def to_representation(self, obj):
+        return obj
 
-class DevicesField(serializers.Field):
-    """ Represents a list of devices with their addresses """
     def to_internal_value(self, data):
+        if checksum_encode(data) != data:
+            raise ValidationError("Address %s is not valid" % data)
         return data
 
 
 # ================================================ #
 #                 Serializers
 # ================================================ #
-
-
 class SignedMessageSerializer(serializers.Serializer):
     """
     Inherit from this class and define get_hashed_fields function
@@ -145,7 +150,7 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 
 
 class NotificationSerializer(SignedMessageSerializer):
-    devices = DevicesField()
+    devices = serializers.ListField(EthereumAddressField())
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['']
