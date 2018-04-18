@@ -1,14 +1,16 @@
 from datetime import datetime
-from ethereum.utils import checksum_encode
 from typing import Any, Dict, Tuple
 from web3.utils.validation import validate_address
 
 from django.utils import timezone
+from django.conf import settings
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
+from gnosis_safe_push_service.firebase.client import FirebaseClient
 
 
 def isoformat_without_ms(date_time):
@@ -162,5 +164,16 @@ class NotificationSerializer(SignedMessageSerializer):
         return data
 
     def create(self, validated_data):
-        # TODO
+        signer_address = validated_data['signing_address']
+        devices = validated_data['devices']
+
+        pairings = DevicePair.objects.filter(
+            (Q(authorizing_device__owner=signer_address) | Q(authorized_device__owner=signer_address)) &
+            (Q(authorizing_device__owner__in=devices) | Q(authorized_device__owner__in=devices))
+        )
+
+        if pairings.count() > 0:
+            client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
+            # client.send_message(validated_data['message'], validated_data[''])
+
         return None
