@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Dict, Tuple
 
 from django.utils import timezone
@@ -59,9 +60,19 @@ class AuthSerializer(SignedMessageSerializer):
 
 
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
-    expiration_date = serializers.DateTimeField()
+    expiration_date = serializers.CharField()
 
     def validate_expiration_date(self, value):
+        # Format should be like '2018-04-20T08:18:36+00:00'
+        datetime_format = '%Y-%m-%dT%H:%M:%S%z'
+
+        try:
+            if value[-3] == ':':
+                value = value[:-3] + value[-2:]
+            value = datetime.strptime(value, datetime_format)
+        except ValueError:
+            raise ValidationError("Date must be '{}' (like 2018-04-20T08:18:36+00:00)".format(datetime_format))
+
         if timezone.now() > value:
             raise ValidationError("Exceeded expiration date")
         return value
@@ -109,6 +120,3 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['device']
-
-
-

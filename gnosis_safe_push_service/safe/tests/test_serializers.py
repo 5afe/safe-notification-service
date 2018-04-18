@@ -9,7 +9,8 @@ from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..serializers import AuthSerializer, PairingSerializer, PairingDeletionSerializer, isoformat_without_ms
+from ..serializers import (AuthSerializer, PairingDeletionSerializer,
+                           PairingSerializer, isoformat_without_ms)
 from .factories import get_bad_signature, get_signature_json
 
 faker = Faker()
@@ -71,10 +72,37 @@ class TestSerializers(TestCase):
 
         self.assertEqual(device_address, pairing_serializer.validated_data['signing_address'])
 
-        # Test expiration date exceeded
+    def test_pairing_with_date_exceeded(self):
+        chrome_address, chrome_key = get_eth_address_with_key()
+        device_address, device_key = get_eth_address_with_key()
+
         expiration_date = isoformat_without_ms(timezone.now() - timedelta(days=2))
-        data['temporary_authorization']['expiration_date'] = expiration_date
-        data['temporary_authorization']['signature'] = get_signature_json(expiration_date, chrome_key)
+
+        data = {
+            "temporary_authorization": {
+                "expiration_date": expiration_date,
+                "signature": get_signature_json(expiration_date, chrome_key),
+            },
+            "signature":  get_signature_json(chrome_address, device_key)
+        }
+
+        pairing_serializer = PairingSerializer(data=data)
+        self.assertFalse(pairing_serializer.is_valid())
+        self.assertTrue('expiration_date' in pairing_serializer.errors['temporary_authorization'])
+
+    def test_pairing_with_date_invalid_format(self):
+        chrome_address, chrome_key = get_eth_address_with_key()
+        device_address, device_key = get_eth_address_with_key()
+
+        expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
+
+        data = {
+            "temporary_authorization": {
+                "expiration_date": expiration_date,
+                "signature": get_signature_json(expiration_date, chrome_key),
+            },
+            "signature":  get_signature_json(chrome_address, device_key)
+        }
 
         pairing_serializer = PairingSerializer(data=data)
         self.assertFalse(pairing_serializer.is_valid())

@@ -11,8 +11,8 @@ from gnosis_safe_push_service.ether.tests.factories import \
     get_eth_address_with_key
 
 from ..models import Device, DevicePair
-from .factories import get_signature_json
 from ..serializers import isoformat_without_ms
+from .factories import get_signature_json
 
 faker = Faker()
 
