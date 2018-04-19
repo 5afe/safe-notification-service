@@ -91,12 +91,23 @@ class AuthSerializer(SignedMessageSerializer):
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['push_token'],
 
+    def validate_push_token(self, value):
+        if value and len(value) > 0:
+            try:
+                Device.objects.get(push_token=value)
+                raise ValidationError('Push token %s already in use' % value)
+            except Device.DoesNotExist:
+                return value
+        else:
+            raise ValidationError('Provide a valid push_token')
+
     def create(self, validated_data):
         instance, _ = Device.objects.update_or_create(
             push_token=validated_data['push_token'],
             owner=validated_data['signing_address']
         )
         return instance
+
 
 
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
@@ -132,6 +143,17 @@ class PairingSerializer(SignedMessageSerializer):
 
         if data['temporary_authorization']['signing_address'] == data['signing_address']:
             raise ValidationError('Both signing addresses must be different')
+
+
+        try:
+            temp_signer = Device.objects.get(owner=data['temporary_authorization']['signing_address'])
+        except Device.DoesNotExist:
+            raise ValidationError('Temporary authorization signer address %s not found' % data['temporary_authorization']['signing_address'])
+
+        try:
+            signer = Device.objects.get(owner=['signing_address'])
+        except Device.DoesNotExist:
+            raise ValidationError('Pairing signer address %s not found' % data['signing_address'])
 
         return data
 
