@@ -208,6 +208,6 @@ class NotificationSerializer(SignedMessageSerializer):
 
         for pairing in pairings:
             # Call celery task for sending notification
-            send_notification.apply(message, pairing.authorizing_device.push_token)
+            send_notification.delay(message, pairing.authorizing_device.push_token)
 
         return pairing
