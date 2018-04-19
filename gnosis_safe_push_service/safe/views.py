@@ -7,7 +7,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gnosis_safe_push_service.safe.models import DevicePair
+from gnosis_safe_push_service.safe.models import Device, DevicePair
 from gnosis_safe_push_service.version import __version__
 
 from .serializers import (AuthSerializer, NotificationSerializer,
@@ -32,6 +32,9 @@ class AuthCreationView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = AuthSerializer
 
+    def get_exception_handler(self, exc):
+        pass
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -43,6 +46,10 @@ class AuthCreationView(CreateAPIView):
 
 class PairingView(APIView):
     permission_classes = (AllowAny,)
+
+    def handle_exception(self, exc):
+        if isinstance(exc, Device.DoesNotExist):
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def post(self, request, *args, **kwargs):
         serializer = PairingSerializer(data=request.data)

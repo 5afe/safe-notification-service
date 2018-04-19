@@ -142,17 +142,6 @@ class PairingSerializer(SignedMessageSerializer):
         if data['temporary_authorization']['signing_address'] == data['signing_address']:
             raise ValidationError('Both signing addresses must be different')
 
-
-        try:
-            temp_signer = Device.objects.get(owner=data['temporary_authorization']['signing_address'])
-        except Device.DoesNotExist:
-            raise ValidationError('Temporary authorization signer address %s not found' % data['temporary_authorization']['signing_address'])
-
-        try:
-            signer = Device.objects.get(owner=['signing_address'])
-        except Device.DoesNotExist:
-            raise ValidationError('Pairing signer address %s not found' % data['signing_address'])
-
         return data
 
     def create(self, validated_data):
@@ -162,6 +151,7 @@ class PairingSerializer(SignedMessageSerializer):
         chrome_device = Device.objects.get(owner=chrome_extension_address)
         owner_device = Device.objects.get(owner=owner)
 
+        # Do pairing
         instance, _ = DevicePair.objects.update_or_create(
             authorizing_device=owner_device,
             authorized_device=chrome_device,
