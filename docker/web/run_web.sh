@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-export CELERY_BROKER_URL="${REDIS_URL}"
-
 echo "==> Migrating Django models ... "
 python manage.py migrate --noinput
 
