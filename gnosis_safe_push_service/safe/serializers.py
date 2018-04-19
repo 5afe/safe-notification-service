@@ -1,16 +1,14 @@
 from datetime import datetime
 from typing import Any, Dict, Tuple
-from ethereum.utils import checksum_encode
 
-from django.utils import timezone
-from django.conf import settings
 from django.db.models import Q
+from django.utils import timezone
+from ethereum.utils import checksum_encode
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
-# from gnosis_safe_push_service.firebase.client import FirebaseClient
 from gnosis_safe_push_service.safe.tasks import send_notification
 
 

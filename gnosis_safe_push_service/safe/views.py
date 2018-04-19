@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 from gnosis_safe_push_service.safe.models import DevicePair
 from gnosis_safe_push_service.version import __version__
 
-from .serializers import (AuthSerializer, PairingDeletionSerializer,
-                          PairingSerializer, NotificationSerializer)
+from .serializers import (AuthSerializer, NotificationSerializer,
+                          PairingDeletionSerializer, PairingSerializer)
 
 
 class AboutView(APIView):

@@ -1,12 +1,14 @@
-from faker import Factory as FakerFactory
-from faker import Faker
-from django.utils import timezone
 from datetime import timedelta
 
-from gnosis_safe_push_service.ether.signing import EthereumSigner
-from gnosis_safe_push_service.ether.tests.factories import get_eth_address_with_key
-from ..serializers import isoformat_without_ms
+from django.utils import timezone
+from faker import Factory as FakerFactory
+from faker import Faker
 
+from gnosis_safe_push_service.ether.signing import EthereumSigner
+from gnosis_safe_push_service.ether.tests.factories import \
+    get_eth_address_with_key
+
+from ..serializers import isoformat_without_ms
 
 fakerFactory = FakerFactory.create()
 faker = Faker()

@@ -1,8 +1,8 @@
 from celery import app
 from celery.utils.log import get_task_logger
-from gnosis_safe_push_service.firebase.client import FirebaseClient
 from django.conf import settings
 
+from gnosis_safe_push_service.firebase.client import FirebaseClient
 
 logger = get_task_logger(__name__)
 oid = 'SAFE_PUSH_SERVICE'

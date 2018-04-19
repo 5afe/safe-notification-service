@@ -9,11 +9,12 @@ from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..serializers import (AuthSerializer, PairingDeletionSerializer,
-                           PairingSerializer, NotificationSerializer, isoformat_without_ms)
-from .factories import (get_bad_signature, get_signature_json, get_auth_mock_data, get_pairing_mock_data,
-                        get_notification_mock_data)
-
+from ..serializers import (AuthSerializer, NotificationSerializer,
+                           PairingDeletionSerializer, PairingSerializer,
+                           isoformat_without_ms)
+from .factories import (get_auth_mock_data, get_bad_signature,
+                        get_notification_mock_data, get_pairing_mock_data,
+                        get_signature_json)
 
 faker = Faker()
 
