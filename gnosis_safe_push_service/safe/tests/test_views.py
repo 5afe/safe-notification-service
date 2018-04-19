@@ -12,7 +12,8 @@ from gnosis_safe_push_service.ether.tests.factories import \
 
 from ..models import Device, DevicePair
 from ..serializers import isoformat_without_ms
-from .factories import get_signature_json, get_auth_mock_data, get_pairing_mock_data
+from .factories import (get_auth_mock_data, get_pairing_mock_data,
+                        get_signature_json)
 
 faker = Faker()
 

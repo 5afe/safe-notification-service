@@ -1,16 +1,15 @@
 from datetime import datetime
 from typing import Any, Dict, Tuple
-from ethereum.utils import checksum_encode
 
-from django.utils import timezone
-from django.conf import settings
 from django.db.models import Q
+from django.utils import timezone
+from ethereum.utils import checksum_encode
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
-from gnosis_safe_push_service.firebase.client import FirebaseClient
+from gnosis_safe_push_service.safe.tasks import send_notification
 
 
 def isoformat_without_ms(date_time):
@@ -90,12 +89,23 @@ class AuthSerializer(SignedMessageSerializer):
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['push_token'],
 
+    def validate_push_token(self, value):
+        if value and len(value) > 0:
+            try:
+                Device.objects.get(push_token=value)
+                raise ValidationError('Push token %s already in use' % value)
+            except Device.DoesNotExist:
+                return value
+        else:
+            raise ValidationError('Provide a valid push_token')
+
     def create(self, validated_data):
         instance, _ = Device.objects.update_or_create(
             push_token=validated_data['push_token'],
             owner=validated_data['signing_address']
         )
         return instance
+
 
 
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
@@ -141,6 +151,7 @@ class PairingSerializer(SignedMessageSerializer):
         chrome_device = Device.objects.get(owner=chrome_extension_address)
         owner_device = Device.objects.get(owner=owner)
 
+        # Do pairing
         instance, _ = DevicePair.objects.update_or_create(
             authorizing_device=owner_device,
             authorized_device=chrome_device,
@@ -181,16 +192,18 @@ class NotificationSerializer(SignedMessageSerializer):
         return data['message']
 
     def create(self, validated_data):
+        """
+        Takes care of getting the valid device pairs for the signing user and
+        sends the notifications.
+        """
         signer_address = validated_data['signing_address']
         devices = validated_data['devices']
+        message = validated_data['message']
 
         pairings = DevicePair.objects.filter(
             (Q(authorizing_device__owner__in=devices) & Q(authorized_device__owner=signer_address))
         ).select_related('authorizing_device')
 
-        # Firebase client
-        client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
-
         for pairing in pairings:
-            # Send firebase notification
-            client.send_message(validated_data['message'], pairing.authorizing_device.push_token)
+            # Call celery task for sending notification
+            send_notification(message, pairing.authorizing_device.push_token)
