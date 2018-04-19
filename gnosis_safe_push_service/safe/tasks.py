@@ -2,10 +2,24 @@ from celery import app
 from celery.utils.log import get_task_logger
 from django.conf import settings
 
-from gnosis_safe_push_service.firebase.client import FirebaseClient
+from gnosis_safe_push_service.firebase.client import (FirebaseClient,
+                                                      MockedClient)
 
 logger = get_task_logger(__name__)
 oid = 'SAFE_PUSH_SERVICE'
+
+
+firebase_client = None
+try:
+    firebase_client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
+except AttributeError:
+    logger.warning('FIREBASE_AUTH_CREDENTIALS not found in settings')
+except Exception as e:
+    logger.warning(e, exc_info=True)
+finally:
+    if not firebase_client:
+        logger.warning('Using mocked notification client')
+        firebase_client = MockedClient()
 
 
 @app.shared_task(bind=True,
@@ -16,7 +30,6 @@ def send_notification(self, message: str, push_token: str) -> None:
     The task sends a Firebase Push Notification
     """
     try:
-        firebase_client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
         firebase_client.send_message(message, push_token)
     except Exception as exc:
         logger.error(exc, exc_info=True)
