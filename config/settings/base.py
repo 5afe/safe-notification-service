@@ -4,7 +4,7 @@ Base settings to build other settings files upon.
 
 import environ
 
-ROOT_DIR = environ.Path(__file__) - 3  # (gnosis_safe_push_service/config/settings/base.py - 3 = gnosis_safe_push_service/)
+ROOT_DIR = environ.Path(__file__) - 3  # (gnosis_safe_push_service/config/settings/base.py - 3 = gnosis-safe-push-service/)
 APPS_DIR = ROOT_DIR.path('gnosis_safe_push_service')
 
 env = environ.Env()
@@ -257,3 +257,11 @@ ETH_HASH_PREFIX = env('ETH_HASH_PREFIX', default='GNO')
 # ------------------------------------------------------------------------------
 NOTIFICATION_RETRY_DELAY_SECONDS = env('NOTIFICATION_RETRY_DELAY_SECONDS', default=1 * 60)  # 1 minute
 NOTIFICATION_MAX_RETRIES = env('NOTIFICATION_MAX_RETRIES', default=3)
+
+FIREBASE_CREDENTIALS_FILE = env('FIREBASE_CREDENTIALS_FILE', default=None)
+if FIREBASE_CREDENTIALS_FILE:
+    import json
+    try:
+        FIREBASE_AUTH_CREDENTIALS = json.load(open(FIREBASE_CREDENTIALS_FILE))
+    except FileNotFoundError:
+        pass
