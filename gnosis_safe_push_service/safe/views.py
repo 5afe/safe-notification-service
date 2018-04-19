@@ -50,6 +50,8 @@ class PairingView(APIView):
     def handle_exception(self, exc):
         if isinstance(exc, Device.DoesNotExist):
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        else:
+            raise exc
 
     def post(self, request, *args, **kwargs):
         serializer = PairingSerializer(data=request.data)
