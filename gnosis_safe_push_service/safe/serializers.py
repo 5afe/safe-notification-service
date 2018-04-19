@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Any, Dict, Tuple
 
@@ -198,7 +199,8 @@ class NotificationSerializer(SignedMessageSerializer):
         """
         signer_address = validated_data['signing_address']
         devices = validated_data['devices']
-        message = validated_data['message']
+        # convert message to JSON
+        message = json.loads(validated_data['message'])
 
         pairings = DevicePair.objects.filter(
             (Q(authorizing_device__owner__in=devices) & Q(authorized_device__owner=signer_address))
@@ -207,3 +209,5 @@ class NotificationSerializer(SignedMessageSerializer):
         for pairing in pairings:
             # Call celery task for sending notification
             send_notification(message, pairing.authorizing_device.push_token)
+
+        return pairing
