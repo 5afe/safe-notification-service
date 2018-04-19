@@ -261,7 +261,4 @@ NOTIFICATION_MAX_RETRIES = env('NOTIFICATION_MAX_RETRIES', default=3)
 FIREBASE_CREDENTIALS_PATH = env('FIREBASE_CREDENTIALS_PATH', default=None)
 if FIREBASE_CREDENTIALS_PATH:
     import json
-    try:
-        FIREBASE_AUTH_CREDENTIALS = json.load(open(FIREBASE_CREDENTIALS_PATH.file('json-credentials.json')))
-    except FileNotFoundError:
-        pass
+    FIREBASE_AUTH_CREDENTIALS = json.load(environ.Path(FIREBASE_CREDENTIALS_PATH).file('json-credentials.json'))
