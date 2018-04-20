@@ -16,11 +16,11 @@ class Device(TimeStampedModel):
     )
 
     class Meta:
-        verbose_name = 'device'
-        verbose_name_plural = 'devices'
+        verbose_name = 'Device'
+        verbose_name_plural = 'Devices'
 
     def __str__(self):
-        return self.push_token
+        return '{} - {}...'.format(self.owner, self.push_token[:10])
 
 
 class DevicePair(TimeStampedModel):
@@ -37,8 +37,8 @@ class DevicePair(TimeStampedModel):
 
     class Meta:
         unique_together = (('authorizing_device', 'authorized_device'),)
-        verbose_name = 'device pair'
-        verbose_name_plural = 'device pairs'
+        verbose_name = 'Device Pair'
+        verbose_name_plural = 'Device Pairs'
 
     def __str__(self):
         return 'D1: %s, D2: %s' % (self.authorized_device.owner, self.authorizing_device.owner)

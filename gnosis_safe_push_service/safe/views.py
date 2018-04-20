@@ -32,9 +32,6 @@ class AuthCreationView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = AuthSerializer
 
-    def get_exception_handler(self, exc):
-        pass
-
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():

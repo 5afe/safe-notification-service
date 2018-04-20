@@ -85,28 +85,31 @@ class SignedMessageSerializer(serializers.Serializer):
 
 
 class AuthSerializer(SignedMessageSerializer):
-    push_token = serializers.CharField()
+    push_token = serializers.CharField(min_length=1)
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['push_token'],
 
     def validate_push_token(self, value):
-        if value and len(value) > 0:
-            try:
-                Device.objects.get(push_token=value)
-                raise ValidationError('Push token %s already in use' % value)
-            except Device.DoesNotExist:
-                return value
-        else:
-            raise ValidationError('Provide a valid push_token')
+        try:
+            Device.objects.get(push_token=value)
+            raise ValidationError('Push token %s already in use' % value)
+        except Device.DoesNotExist:
+            return value
 
     def create(self, validated_data):
-        instance, _ = Device.objects.update_or_create(
-            push_token=validated_data['push_token'],
-            owner=validated_data['signing_address']
-        )
-        return instance
-
+        owner = validated_data['signing_address']
+        push_token = validated_data['push_token']
+        try:
+            device = Device.objects.get(owner=owner)
+            device.push_token = push_token
+            device.save()
+        except Device.DoesNotExist:
+            device = Device.objects.create(
+                owner=owner,
+                push_token=push_token
+            )
+        return device
 
 
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
