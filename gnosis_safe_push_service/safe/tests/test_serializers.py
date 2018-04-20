@@ -106,6 +106,13 @@ class TestSerializers(TestCase):
         serializer = NotificationSerializer(data=notification_data)
         self.assertTrue(serializer.is_valid())
 
+        # Message no json compliant
+        notification_data = get_notification_mock_data()
+        notification_data['message'] = 'NoValid{Json}'
+        serializer = NotificationSerializer(data=notification_data)
+        self.assertFalse(serializer.is_valid())
+        self.assertTrue('message' in serializer.errors)
+
         # Bad format
         invalid_notification_data = get_notification_mock_data(devices=['0x0', '0x1'])
         serializer = NotificationSerializer(data=invalid_notification_data)

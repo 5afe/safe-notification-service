@@ -255,8 +255,8 @@ ETH_HASH_PREFIX = env('ETH_HASH_PREFIX', default='GNO')
 
 # Notifications
 # ------------------------------------------------------------------------------
-NOTIFICATION_RETRY_DELAY_SECONDS = env('NOTIFICATION_RETRY_DELAY_SECONDS', default=1 * 60)  # 1 minute
 NOTIFICATION_MAX_RETRIES = env('NOTIFICATION_MAX_RETRIES', default=3)
+NOTIFICATION_RETRY_DELAY_SECONDS = env('NOTIFICATION_RETRY_DELAY_SECONDS', default=1 * 60)  # 1 minute
 
 FIREBASE_CREDENTIALS_PATH = env('FIREBASE_CREDENTIALS_PATH', default=None)
 if FIREBASE_CREDENTIALS_PATH:

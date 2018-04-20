@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 from typing import Any, Dict, Tuple
 
@@ -11,8 +12,6 @@ from rest_framework.exceptions import ValidationError
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
 from gnosis_safe_push_service.safe.tasks import send_notification
-import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +182,15 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 class NotificationSerializer(SignedMessageSerializer):
     devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
     message = serializers.CharField()
+
+    def validate_message(self, data):
+        try:
+            json.loads(data)
+        except json.JSONDecodeError:
+            raise ValidationError("message must be a valid stringified JSON")
+        except Exception as e:
+            pass
+        return data
 
     def validate(self, data):
         super().validate(data)

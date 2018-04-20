@@ -23,6 +23,9 @@ class AboutView(APIView):
             'api_version': self.request.version,
             'settings': {
                 'ETH_HASH_PREFIX ': settings.ETH_HASH_PREFIX,
+                'FIREBASE_CREDENTIALS_PATH': settings.FIREBASE_CREDENTIALS_PATH,
+                'NOTIFICATION_MAX_RETRIES': settings.NOTIFICATION_MAX_RETRIES,
+                'NOTIFICATION_RETRY_DELAY_SECONDS': settings.NOTIFICATION_RETRY_DELAY_SECONDS,
             }
         }
         return Response(content)

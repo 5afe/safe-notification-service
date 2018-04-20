@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from django.utils import timezone
@@ -69,7 +70,7 @@ def get_pairing_mock_data(expiration_date=None, chrome_key=None, chrome_address=
 
 def get_notification_mock_data(devices=None):
     """ Generates a dictionary data specifying a notification message """
-    message = faker.name()
+    message = json.dumps({'title': faker.name()})
     eth_address, eth_key = get_eth_address_with_key()
     eth_address2, _ = get_eth_address_with_key()
     eth_address3, _ = get_eth_address_with_key()
