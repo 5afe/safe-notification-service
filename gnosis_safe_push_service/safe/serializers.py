@@ -210,4 +210,7 @@ class NotificationSerializer(SignedMessageSerializer):
             # Call celery task for sending notification
             send_notification.delay(message, pairing.authorizing_device.push_token)
 
-        return pairing
+        return pairings
+
+    def to_representation(self, instance):
+        return {}

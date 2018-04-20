@@ -22,12 +22,7 @@ class MessagingClient(ABC):
 
     @abstractmethod
     def send_message(self, data, token):
-        message = messaging.Message(
-            data=data,
-            token=token
-        )
-        response = messaging.send(message)
-        return response
+        raise NotImplementedError
 
 
 
@@ -39,7 +34,7 @@ class FirebaseClient(MessagingClient):
         self._authenticate(*args, **kwargs)
 
     def _authenticate(self, *args, **kwargs):
-        if isinstance(credentials, dict):
+        if isinstance(self._credentials, dict):
             self._auth_instance = credentials.Certificate(self._credentials)
             self._app = initialize_app(self._auth_instance, *args, **kwargs)
         else:
