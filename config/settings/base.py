@@ -230,10 +230,15 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'stdout': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
     },
     'loggers': {
-        '': {
-            'handlers': ['console'],
+        'stdout': {
+            'handlers': ['stdout'],
             'level': 'INFO',
         },
         'django.request': {

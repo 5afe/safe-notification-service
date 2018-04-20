@@ -11,6 +11,10 @@ from rest_framework.exceptions import ValidationError
 from gnosis_safe_push_service.ether.signing import EthereumSignedMessage
 from gnosis_safe_push_service.safe.models import Device, DevicePair
 from gnosis_safe_push_service.safe.tasks import send_notification
+import logging
+
+
+logger = logging.getLogger('stdout')
 
 
 def isoformat_without_ms(date_time):
@@ -208,6 +212,8 @@ class NotificationSerializer(SignedMessageSerializer):
         pairings = DevicePair.objects.filter(
             (Q(authorizing_device__owner__in=devices) & Q(authorized_device__owner=signer_address))
         ).select_related('authorizing_device')
+
+        logger.info('Found %s paired devices, sender: %s, devices: %s' % (pairings.count(), signer_address, devices))
 
         for pairing in pairings:
             # Call celery task for sending notification
