@@ -14,7 +14,7 @@ from gnosis_safe_push_service.safe.tasks import send_notification
 import logging
 
 
-logger = logging.getLogger('stdout')
+logger = logging.getLogger(__name__)
 
 
 def isoformat_without_ms(date_time):
