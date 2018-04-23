@@ -4,14 +4,23 @@ from model_utils.models import TimeStampedModel
 from .validators import validate_checksumed_address
 
 
+class DeviceManager(models.Manager):
+    def get_or_create_without_push_token(self, owner):
+        try:
+            return self.get(owner=owner)
+        except self.model.DoesNotExist:
+            return self.create(owner=owner, push_token=None)
+
+
 class Device(TimeStampedModel):
+    objects = DeviceManager()
     push_token = models.TextField(
-        verbose_name='push_token'
+        null=True,
+        blank=True,
     )
     owner = models.CharField(
         max_length=42,
         primary_key=True,
-        verbose_name='owner',
         validators=[validate_checksumed_address],
     )
 
@@ -20,7 +29,8 @@ class Device(TimeStampedModel):
         verbose_name_plural = 'Devices'
 
     def __str__(self):
-        return '{} - {}...'.format(self.owner, self.push_token[:10])
+        token = self.push_token[:10] if self.push_token else 'No Token'
+        return '{} - {}...'.format(self.owner, token)
 
 
 class DevicePair(TimeStampedModel):
@@ -41,4 +51,4 @@ class DevicePair(TimeStampedModel):
         verbose_name_plural = 'Device Pairs'
 
     def __str__(self):
-        return 'D1: %s, D2: %s' % (self.authorized_device.owner, self.authorizing_device.owner)
+        return '{} authorizes {}'.format(self.authorizing_device.owner, self.authorized_device.owner)
