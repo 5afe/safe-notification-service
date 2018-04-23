@@ -155,8 +155,8 @@ class PairingSerializer(SignedMessageSerializer):
         chrome_extension_address = validated_data['temporary_authorization']['signing_address']
         owner = validated_data['signing_address']
 
-        chrome_device = Device.objects.get(owner=chrome_extension_address)
-        owner_device = Device.objects.get(owner=owner)
+        chrome_device = Device.objects.get_or_create_without_push_token(chrome_extension_address)
+        owner_device = Device.objects.get_or_create_without_push_token(owner)
 
         # Do pairing
         instance, _ = DevicePair.objects.update_or_create(
@@ -225,7 +225,10 @@ class NotificationSerializer(SignedMessageSerializer):
 
         for pairing in pairings:
             # Call celery task for sending notification
-            send_notification.delay(message, pairing.authorizing_device.push_token)
+            if pairing.authorizing_device.push_token:
+                send_notification.delay(message, pairing.authorizing_device.push_token)
+            else:
+                logger.warning("Address %s has no push_token", pairing.authorizing_device.owner)
 
         return pairings
 

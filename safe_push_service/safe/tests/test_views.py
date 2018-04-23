@@ -46,13 +46,13 @@ class TestViews(APITestCase):
     def test_pairing_creation(self):
         chrome_address, chrome_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
-        pairing_data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
+        data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
 
         Device.objects.create(push_token=faker.name(), owner=chrome_address)
         Device.objects.create(push_token=faker.name(), owner=device_address)
 
         request = self.client.post(reverse('v1:pairing'),
-                                   data=json.dumps(pairing_data),
+                                   data=json.dumps(data),
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_201_CREATED)
 
@@ -60,11 +60,30 @@ class TestViews(APITestCase):
 
         # Repeat same request (make sure creation is idempotent)
         request = self.client.post(reverse('v1:pairing'),
-                                   data=json.dumps(pairing_data),
+                                   data=json.dumps(data),
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_201_CREATED)
 
         self.assertEquals(DevicePair.objects.count(), 2)
+
+    def test_pairing_creation_without_auth(self):
+        """
+        Test pairing with devices that haven't been authenticated before
+        """
+
+        chrome_address, chrome_key = get_eth_address_with_key()
+        device_address, device_key = get_eth_address_with_key()
+        data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
+
+        request = self.client.post(reverse('v1:pairing'),
+                                   data=json.dumps(data),
+                                   content_type='application/json')
+        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+
+        self.assertEquals(DevicePair.objects.count(), 2)
+
+        self.assertIsNone(Device.objects.get(owner=chrome_address).push_token)
+        self.assertIsNone(Device.objects.get(owner=device_address).push_token)
 
     def test_pairing_deletion(self):
         chrome_address, chrome_key = get_eth_address_with_key()
