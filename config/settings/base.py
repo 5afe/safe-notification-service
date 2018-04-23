@@ -4,7 +4,7 @@ Base settings to build other settings files upon.
 
 import environ
 
-ROOT_DIR = environ.Path(__file__) - 3  # (safe_push_service/config/settings/base.py - 3 = gnosis-safe-push-service/)
+ROOT_DIR = environ.Path(__file__) - 3  # (safe_push_service/config/settings/base.py - 3 = safe-push-service/)
 APPS_DIR = ROOT_DIR.path('safe_push_service')
 
 env = environ.Env()

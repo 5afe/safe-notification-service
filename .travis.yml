@@ -21,14 +21,14 @@ after_success:
 - # Create Docker image if branch master or develop and not on pull requests
   if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     if [ "$TRAVIS_BRANCH" == "master" ]; then
-      docker build -t gnosis-safe-push-service -f docker/web/Dockerfile .;
+      docker build -t safe-push-service -f docker/web/Dockerfile .;
       docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-      docker tag gnosis-safe-push-service gnosispm/gnosis-safe-push-service:staging;
-      docker push gnosispm/gnosis-safe-push-service:staging;
+      docker tag safe-push-service gnosispm/safe-push-service:staging;
+      docker push gnosispm/safe-push-service:staging;
     elif [ "$TRAVIS_BRANCH" == "develop" ]; then
-      docker build -t gnosis-safe-push-service -f docker/web/Dockerfile .;
+      docker build -t safe-push-service -f docker/web/Dockerfile .;
       docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-      docker tag gnosis-safe-push-service gnosispm/gnosis-safe-push-service:develop;
-      docker push gnosispm/gnosis-safe-push-service:develop;
+      docker tag safe-push-service gnosispm/safe-push-service:develop;
+      docker push gnosispm/safe-push-service:develop;
     fi
   fi
