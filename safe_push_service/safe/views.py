@@ -7,8 +7,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gnosis_safe_push_service.safe.models import Device, DevicePair
-from gnosis_safe_push_service.version import __version__
+from safe_push_service.safe.models import Device, DevicePair
+from safe_push_service.version import __version__
 
 from .serializers import (AuthSerializer, NotificationSerializer,
                           PairingDeletionSerializer, PairingSerializer)

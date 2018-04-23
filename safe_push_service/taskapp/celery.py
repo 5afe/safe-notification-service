@@ -10,11 +10,11 @@ if not settings.configured:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')  # pragma: no cover
 
 
-app = Celery('gnosis_safe_push_service')
+app = Celery('safe_push_service')
 
 
 class CeleryConfig(AppConfig):
-    name = 'gnosis_safe_push_service.taskapp'
+    name = 'safe_push_service.taskapp'
     verbose_name = 'Celery Config'
 
     # Use Django logging instead of celery logger

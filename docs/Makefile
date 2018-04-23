@@ -77,17 +77,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/gnosis_safe_push_service.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/safe_push_service.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/gnosis_safe_push_service.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/safe_push_service.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/gnosis_safe_push_service"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/gnosis_safe_push_service"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/safe_push_service"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/safe_push_service"
 	@echo "# devhelp"
 
 epub:

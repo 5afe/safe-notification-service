@@ -2,7 +2,7 @@ from celery import app
 from celery.utils.log import get_task_logger
 from django.conf import settings
 
-from gnosis_safe_push_service.firebase.client import (FirebaseClient,
+from safe_push_service.firebase.client import (FirebaseClient,
                                                       MockedClient)
 
 logger = get_task_logger(__name__)

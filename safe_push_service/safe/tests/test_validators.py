@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from gnosis_safe_push_service.ether.tests.factories import \
+from safe_push_service.ether.tests.factories import \
     get_eth_address_with_key
 
 from ..validators import validate_checksumed_address

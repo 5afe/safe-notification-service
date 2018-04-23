@@ -19,10 +19,10 @@ import sys
 from django.core.wsgi import get_wsgi_application
 
 # This allows easy placement of apps within the interior
-# gnosis_safe_push_service directory.
+# safe_push_service directory.
 app_path = os.path.abspath(os.path.join(
     os.path.dirname(os.path.abspath(__file__)), os.pardir))
-sys.path.append(os.path.join(app_path, 'gnosis_safe_push_service'))
+sys.path.append(os.path.join(app_path, 'safe_push_service'))
 
 
 

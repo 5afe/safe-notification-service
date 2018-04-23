@@ -22,8 +22,8 @@ if __name__ == '__main__':
         raise
 
     # This allows easy placement of apps within the interior
-    # gnosis_safe_push_service directory.
+    # safe_push_service directory.
     current_path = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(current_path, 'gnosis_safe_push_service'))
+    sys.path.append(os.path.join(current_path, 'safe_push_service'))
 
     execute_from_command_line(sys.argv)

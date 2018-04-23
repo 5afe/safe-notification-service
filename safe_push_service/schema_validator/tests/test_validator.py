@@ -3,7 +3,7 @@ import os
 from django.test import TestCase
 from jsonschema.exceptions import ValidationError
 
-from gnosis_safe_push_service.schema_validator.validator import Validator
+from safe_push_service.schema_validator.validator import Validator
 
 
 class TestValidator(TestCase):

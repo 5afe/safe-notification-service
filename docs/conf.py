@@ -163,7 +163,7 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "gnosis_safe_push_servicedoc"
+htmlhelp_basename = "safe_push_servicedoc"
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -182,7 +182,7 @@ latex_elements = {
 latex_documents = [
     (
         "index",
-        "gnosis_safe_push_service.tex",
+        "safe_push_service.tex",
         "Gnosis Safe Push Service Documentation",
         """Gnosis""",
         "manual",
@@ -217,7 +217,7 @@ latex_documents = [
 man_pages = [
     (
         "index",
-        "gnosis_safe_push_service",
+        "safe_push_service",
         "Gnosis Safe Push Service Documentation",
         ["""Gnosis"""],
         1,
@@ -236,7 +236,7 @@ man_pages = [
 texinfo_documents = [
     (
         "index",
-        "gnosis_safe_push_service",
+        "safe_push_service",
         "Gnosis Safe Push Service Documentation",
         """Gnosis""",
         "Gnosis Safe Push Service",
