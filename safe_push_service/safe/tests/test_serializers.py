@@ -6,13 +6,13 @@ from faker import Faker
 from rest_framework.exceptions import ValidationError
 
 from safe_push_service.ether.signing import EthereumSignedMessage
-from safe_push_service.ether.tests.factories import \
-    get_eth_address_with_key
+from safe_push_service.ether.tests.factories import get_eth_address_with_key
 
-from ..serializers import (AuthSerializer, NotificationSerializer,
-                           PairingDeletionSerializer, PairingSerializer,
-                           isoformat_without_ms)
+from ..serializers import (AuthSerializer, GoogleInAppPurchaseSerializer,
+                           NotificationSerializer, PairingDeletionSerializer,
+                           PairingSerializer, isoformat_without_ms)
 from .factories import (get_auth_mock_data, get_bad_signature,
+                        get_google_billing_test_data,
                         get_notification_mock_data, get_pairing_mock_data,
                         get_signature_json)
 
@@ -147,3 +147,26 @@ class TestSerializers(TestCase):
 
         notification_serializer = NotificationSerializer(data=data)
         self.assertFalse(notification_serializer.is_valid())
+
+    def test_google_in_app_purchase_serializer(self):
+        app_public_key, purchase_json, purchase_signature = get_google_billing_test_data()
+
+        with self.settings(GOOGLE_BILLING_PUBLIC_KEY_BASE64=app_public_key):
+
+            data = {
+                'signed_data': purchase_json,
+                'signature': purchase_signature,
+            }
+
+            google_in_app_purchase_serializer = GoogleInAppPurchaseSerializer(data=data)
+            self.assertTrue(google_in_app_purchase_serializer.is_valid())
+            self.assertTrue(isinstance(google_in_app_purchase_serializer.validated_data['signed_data'], dict))
+
+            data = {
+                'signed_data': purchase_json.replace('{', '}'),
+                'signature': purchase_signature,
+            }
+
+            google_in_app_purchase_serializer = GoogleInAppPurchaseSerializer(data=data)
+            self.assertFalse(google_in_app_purchase_serializer.is_valid())
+            self.assertTrue('signed_data' in google_in_app_purchase_serializer.errors)

@@ -1,13 +1,13 @@
 import json
 from datetime import timedelta
+from typing import Tuple
 
 from django.utils import timezone
 from faker import Factory as FakerFactory
 from faker import Faker
 
 from safe_push_service.ether.signing import EthereumSigner
-from safe_push_service.ether.tests.factories import \
-    get_eth_address_with_key
+from safe_push_service.ether.tests.factories import get_eth_address_with_key
 
 from ..serializers import isoformat_without_ms
 
@@ -83,3 +83,11 @@ def get_notification_mock_data(devices=None):
         'message': message,
         'signature': get_signature_json(message, eth_key),
     }
+
+
+def get_google_billing_test_data() -> Tuple[str, str, str]:
+    app_public_key = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm4w3ftcwdpqMMB4xTJJ/BNl9Ws6/vpJjAhDEaGPXZNO4CX0j9OtP/Ajl35QQIfQXnuLvkDislMYRTSsnLiOsP7FbZWxngKkMOteteknFuKLx2MXgWDbDVX2pzjCqSbHEXbo2zwpZ5vuaQilxgsYigBqobxw48thJvALfAmXBt/W57jc81jxzBOSNjWFLTGQa51Tv+eRCe30UAlRIOvQS1+I63n1nS1tLcVgcdBp/txdsrd2bHPWW0SIo5U1KPmWWXxA4wQ2WERIJQvOBJe2I11cGVsLiMuDshVmE1onpZDKSfF2gT4IvtM0lMRAfbdX5rmonz5Epf8on+EODlAf96wIDAQAB'
+    purchase_json = '{"orderId":"GPA.3329-5458-1185-47553","packageName":"pm.gnosis.billingsample","productId":"gas","purchaseTime":1524652039139,"purchaseState":0,"purchaseToken":"nlhfgblkdihollmhcpkggkeo.AO-J1Oz1zkh_AogdW_xmXgsGC1pQ6Jl-nFI_SZ1cayDDI5lnKsZLyMwgjQkAMR39701mxGRhEiCSH9jhFKiL58M0HcV35tKSfE5gIKKxXcFAt9a_wmkpXnY"}'
+    purchase_signature = 'bRlFfj2XTkwG5YX0MC1+JOBW0aJg8FwRqVYwieb9IpeO/tITqjgWYa9ZOx1xGHHC2A9aP+Db9r36nBvlq6K0qdBwBJRozwrPHRjc1kQNcMypCS1tHJCkv7A+GZHEVBIwsCK1kABTQHp2vIi2wDzvaR2r/EUZYevLPxcF5Y0gjzJH4A0zK7Hr8GorBbMKmtFwrhtheLrzqNrYVIwJ5sTAZvGvbH6Bva5f1uVJokgz4DE/04WmKIrczufXsc+CA4rve8oPvSs0eUW57Si0lIAHGyILpsw8F2whB2d71gyRj8qeWDQR8Rz0oaLpyOimNJq7pY0p3yyvn3+l3zYbGDfQog=='
+
+    return app_public_key, purchase_json, purchase_signature
