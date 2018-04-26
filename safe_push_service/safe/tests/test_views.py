@@ -5,8 +5,7 @@ from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from safe_push_service.ether.tests.factories import \
-    get_eth_address_with_key
+from safe_push_service.ether.tests.factories import get_eth_address_with_key
 
 from ..models import Device, DevicePair
 from .factories import (get_auth_mock_data, get_pairing_mock_data,

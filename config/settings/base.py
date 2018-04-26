@@ -262,3 +262,6 @@ FIREBASE_CREDENTIALS_PATH = env('FIREBASE_CREDENTIALS_PATH', default=None)
 if FIREBASE_CREDENTIALS_PATH:
     import json
     FIREBASE_AUTH_CREDENTIALS = json.load(environ.Path(FIREBASE_CREDENTIALS_PATH).file('firebase-credentials.json'))
+
+# Google InApp Billing
+GOOGLE_BILLING_PUBLIC_KEY_BASE64 = env('GOOGLE_BILLING_PUBLIC_KEY_BASE64', default=None)

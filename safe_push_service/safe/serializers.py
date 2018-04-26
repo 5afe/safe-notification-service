@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, Tuple
 
+from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 from ethereum.utils import checksum_encode
@@ -12,6 +13,8 @@ from rest_framework.exceptions import ValidationError
 from safe_push_service.ether.signing import EthereumSignedMessage
 from safe_push_service.safe.models import Device, DevicePair
 from safe_push_service.safe.tasks import send_notification
+
+from .helpers import validate_google_billing_purchase
 
 logger = logging.getLogger(__name__)
 
@@ -234,3 +237,34 @@ class NotificationSerializer(SignedMessageSerializer):
 
     def to_representation(self, instance):
         return {}
+
+
+class GoogleInAppPurchaseSerializer(serializers.Serializer):
+    signed_data = serializers.CharField(min_length=1)
+    signature = serializers.CharField(min_length=344, max_length=344)
+
+    def validate_signed_data(self, value):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            raise ValidationError('Cannot decode signed_data JSON')
+
+    def validate(self, data):
+        signed_data_str = self.initial_data['signed_data']
+        signed_data = data['signed_data']
+        signature = data['signature']
+
+        google_billing_public_key_base64 = settings.GOOGLE_BILLING_PUBLIC_KEY_BASE64
+
+        if not google_billing_public_key_base64:
+            raise ValidationError('GOOGLE_BILLING_PUBLIC_KEY_BASE64 environment variable not found')
+
+        if not validate_google_billing_purchase(google_billing_public_key_base64, signed_data_str, signature):
+            raise ValidationError('Cannot validate google signed data')
+
+        data['order_id'] = signed_data['orderId']
+        data['product_id'] = signed_data['productId']
+        data['purchase_time'] = datetime.utcfromtimestamp(signed_data['purchaseTime'] / 1000)
+        data['package_name'] = signed_data['packageName']
+
+        return data
