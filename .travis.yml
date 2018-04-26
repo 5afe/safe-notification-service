@@ -1,7 +1,7 @@
 language: python
 cache: pip
 python:
-- '3.6'
+  - '3.6'
 dist: trusty
 env:
   global:
@@ -19,16 +19,22 @@ script:
 after_success:
 - coveralls
 - # Create Docker image if branch master or develop and not on pull requests
-  if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    if [ "$TRAVIS_BRANCH" == "master" ]; then
-      docker build -t safe-push-service -f docker/web/Dockerfile .;
-      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-      docker tag safe-push-service gnosispm/safe-push-service:staging;
-      docker push gnosispm/safe-push-service:staging;
-    elif [ "$TRAVIS_BRANCH" == "develop" ]; then
-      docker build -t safe-push-service -f docker/web/Dockerfile .;
-      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-      docker tag safe-push-service gnosispm/safe-push-service:develop;
-      docker push gnosispm/safe-push-service:develop;
+  GIT_TAG=`git tag -l --points-at`
+- if [ $GIT_TAG ]; then
+    DOCKER_TAG=$GIT_TAG;
+  else
+    if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+      if [ "$TRAVIS_BRANCH" == "master" ]; then
+        DOCKER_TAG=staging;
+      elif [ "$TRAVIS_BRANCH" == "develop" ]; then
+        DOCKER_TAG=develop;
+      fi
+    fi
+  fi
+- if [ $DOCKER_TAG ]; then
+    docker build -t safe-push-service -f docker/web/Dockerfile .;
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker tag safe-push-service gnosispm/safe-push-service:$DOCKER_TAG;
+    docker push gnosispm/safe-push-service:$DOCKER_TAG;
     fi
   fi
