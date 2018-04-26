@@ -36,5 +36,4 @@ after_success:
     docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
     docker tag safe-push-service gnosispm/safe-push-service:$DOCKER_TAG;
     docker push gnosispm/safe-push-service:$DOCKER_TAG;
-    fi
   fi
