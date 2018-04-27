@@ -1,39 +1,38 @@
 language: python
 cache: pip
 python:
-  - '3.6'
+  - "3.6"
 dist: trusty
 env:
   global:
-  - DATABASE_URL=psql://postgres@localhost/travisci
+  - DOCKERHUB_PROJECT=safe-push-service
+  - SOURCE_FOLDER=safe_push_service 
   - PIP_USE_MIRRORS=true
+  - DATABASE_URL=psql://postgres@localhost/travisci
 services:
-- postgresql
-before_script:
-- psql -c 'create database travisci;' -U postgres
+  - postgresql
+  - docker
 install:
-- pip install -r requirements.txt
-- pip install coveralls
+  - pip install -r requirements.txt
+  - pip install coveralls
+before_script:
+  - psql -c 'create database travisci;' -U postgres
 script:
-- coverage run --source=safe_push_service manage.py test --settings=config.settings.test
+  - coverage run --source=$SOURCE_FOLDER manage.py test --settings=config.settings.test
+deploy:
+  - provider: script
+    script: bash scripts/deploy_docker.sh staging
+    on:
+      branch: master
+  - provider: script
+    script: bash scripts/deploy_docker.sh develop
+    on:
+      branch: develop
+  - provider: script
+    script: bash scripts/deploy_docker.sh $TRAVIS_TAG
+    on:
+      tags: true
+      all_branches: true
+
 after_success:
-- coveralls
-- # Create Docker image if branch master or develop and not on pull requests
-  GIT_TAG=`git tag -l --points-at`
-- if [ $GIT_TAG ]; then
-    DOCKER_TAG=$GIT_TAG;
-  else
-    if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-      if [ "$TRAVIS_BRANCH" == "master" ]; then
-        DOCKER_TAG=staging;
-      elif [ "$TRAVIS_BRANCH" == "develop" ]; then
-        DOCKER_TAG=develop;
-      fi
-    fi
-  fi
-- if [ $DOCKER_TAG ]; then
-    docker build -t safe-push-service -f docker/web/Dockerfile .;
-    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-    docker tag safe-push-service gnosispm/safe-push-service:$DOCKER_TAG;
-    docker push gnosispm/safe-push-service:$DOCKER_TAG;
-  fi
+  - coveralls
