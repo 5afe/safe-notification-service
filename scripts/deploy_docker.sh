@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     if [ "$1" = "develop" -o "$1" = "master" ]; then
