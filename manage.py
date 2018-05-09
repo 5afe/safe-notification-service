@@ -24,6 +24,6 @@ if __name__ == '__main__':
     # This allows easy placement of apps within the interior
     # safe_notification_service directory.
     current_path = os.path.dirname(os.path.abspath(__file__))
-    sys.path.append(os.path.join(current_path, 'safe_notificaion_service'))
+    sys.path.append(os.path.join(current_path, 'safe_notification_service'))
 
     execute_from_command_line(sys.argv)
