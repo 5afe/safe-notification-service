@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-import safe_push_service.safe.validators
+import safe_notification_service.safe.validators
 
 
 class Migration(migrations.Migration):
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='device',
             name='owner',
-            field=models.CharField(max_length=42, primary_key=True, serialize=False, validators=[safe_push_service.safe.validators.validate_checksumed_address]),
+            field=models.CharField(max_length=42, primary_key=True, serialize=False, validators=[safe_notification_service.safe.validators.validate_checksumed_address]),
         ),
         migrations.AlterField(
             model_name='device',

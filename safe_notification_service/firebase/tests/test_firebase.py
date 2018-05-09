@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from safe_push_service.firebase.client import FirebaseClient
+from safe_notification_service.firebase.client import FirebaseClient
 
 from .utils import MessagingService, MockCredential, send_message
 
