@@ -10,9 +10,9 @@ from ethereum.utils import checksum_encode
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from safe_push_service.ether.signing import EthereumSignedMessage
-from safe_push_service.safe.models import Device, DevicePair
-from safe_push_service.safe.tasks import send_notification
+from safe_notification_service.ether.signing import EthereumSignedMessage
+from safe_notification_service.safe.models import Device, DevicePair
+from safe_notification_service.safe.tasks import send_notification
 
 from .helpers import validate_google_billing_purchase
 

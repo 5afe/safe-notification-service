@@ -6,8 +6,8 @@ from django.utils import timezone
 from faker import Factory as FakerFactory
 from faker import Faker
 
-from safe_push_service.ether.signing import EthereumSigner
-from safe_push_service.ether.tests.factories import get_eth_address_with_key
+from safe_notification_service.ether.signing import EthereumSigner
+from safe_notification_service.ether.tests.factories import get_eth_address_with_key
 
 from ..serializers import isoformat_without_ms
 
