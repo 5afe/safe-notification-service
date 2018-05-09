@@ -3,7 +3,7 @@ from logging import getLogger
 
 from firebase_admin import credentials, initialize_app, messaging
 
-from safe_push_service.utils.singleton import singleton
+from safe_notification_service.utils.singleton import singleton
 
 logger = getLogger(__name__)
 

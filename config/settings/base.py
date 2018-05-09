@@ -4,8 +4,8 @@ Base settings to build other settings files upon.
 
 import environ
 
-ROOT_DIR = environ.Path(__file__) - 3  # (safe_push_service/config/settings/base.py - 3 = safe-push-service/)
-APPS_DIR = ROOT_DIR.path('safe_push_service')
+ROOT_DIR = environ.Path(__file__) - 3  # (safe_notification_service/config/settings/base.py - 3 = safe-notification-service/)
+APPS_DIR = ROOT_DIR.path('safe_notification_service')
 
 env = environ.Env()
 
@@ -67,7 +67,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_swagger',
 ]
 LOCAL_APPS = [
-    'safe_push_service.safe.apps.SafeConfig',
+    'safe_notification_service.safe.apps.SafeConfig',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -168,7 +168,7 @@ MANAGERS = ADMINS
 
 # Celery
 # ------------------------------------------------------------------------------
-INSTALLED_APPS += ['safe_push_service.taskapp.celery.CeleryConfig']
+INSTALLED_APPS += ['safe_notification_service.taskapp.celery.CeleryConfig']
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-broker_url
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-result_backend

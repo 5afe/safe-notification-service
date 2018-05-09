@@ -4,7 +4,7 @@ import json
 from jsonschema import Draft4Validator, validate, validators
 from jsonschema.exceptions import ValidationError
 
-from safe_push_service.utils.singleton import singleton
+from safe_notification_service.utils.singleton import singleton
 
 
 @singleton

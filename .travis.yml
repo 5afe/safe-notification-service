@@ -5,8 +5,8 @@ python:
 dist: trusty
 env:
   global:
-  - DOCKERHUB_PROJECT=safe-push-service
-  - SOURCE_FOLDER=safe_push_service
+  - DOCKERHUB_PROJECT=safe-notification-service
+  - SOURCE_FOLDER=safe_notification_service
   - PIP_USE_MIRRORS=true
   - DATABASE_URL=psql://postgres@localhost/travisci
 services:

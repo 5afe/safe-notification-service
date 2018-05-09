@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.org/gnosis/safe-push-service.svg?branch=master)](https://travis-ci.org/gnosis/safe-push-service)
-[![Coverage Status](https://coveralls.io/repos/github/gnosis/safe-push-service/badge.svg?branch=master)](https://coveralls.io/github/gnosis/safe-push-service?branch=master)
+[![Build Status](https://travis-ci.org/gnosis/safe-notification-service.svg?branch=master)](https://travis-ci.org/gnosis/safe-notification-service)
+[![Coverage Status](https://coveralls.io/repos/github/gnosis/safe-notification-service/badge.svg?branch=master)](https://coveralls.io/github/gnosis/safe-notification-service?branch=master)
 ![Python 3.6](https://img.shields.io/badge/Python-3.6-blue.svg)
 ![Django 2](https://img.shields.io/badge/Django-2-blue.svg)
 
-# Gnosis Safe Push Service
+# Gnosis Safe Notification Service
 Service for Gnosis Safe push notifications
 
 ## Index of contents
