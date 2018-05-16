@@ -234,7 +234,7 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG' if DEBUG else 'INFO',
         },
         'django.request': {
             'handlers': ['mail_admins'],

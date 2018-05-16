@@ -49,6 +49,7 @@ class FirebaseClient(MessagingClient):
         return self._app
 
     def send_message(self, data, token):
+        logger.debug("Sending data=%s with token=%s", data, token)
         message = messaging.Message(
             data=data,
             token=token
