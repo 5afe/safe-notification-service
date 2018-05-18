@@ -2,7 +2,8 @@ from celery import app
 from celery.utils.log import get_task_logger
 from django.conf import settings
 
-from safe_notification_service.firebase.client import FirebaseClient, MockedClient
+from safe_notification_service.firebase.client import (FirebaseClient,
+                                                       MockedClient)
 
 logger = get_task_logger(__name__)
 oid = 'SAFE_NOTIFICATION_SERVICE'

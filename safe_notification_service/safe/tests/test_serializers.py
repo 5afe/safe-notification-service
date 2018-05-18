@@ -6,7 +6,8 @@ from faker import Faker
 from rest_framework.exceptions import ValidationError
 
 from safe_notification_service.ether.signing import EthereumSignedMessage
-from safe_notification_service.ether.tests.factories import get_eth_address_with_key
+from safe_notification_service.ether.tests.factories import \
+    get_eth_address_with_key
 
 from ..serializers import (AuthSerializer, GoogleInAppPurchaseSerializer,
                            NotificationSerializer, PairingDeletionSerializer,
@@ -105,6 +106,7 @@ class TestSerializers(TestCase):
         notification_data = get_notification_mock_data()
         serializer = NotificationSerializer(data=notification_data)
         self.assertTrue(serializer.is_valid())
+        self.assertFalse(serializer.save())
 
         # Message no json compliant
         notification_data = get_notification_mock_data()

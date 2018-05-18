@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from safe_notification_service.ether.tests.factories import get_eth_address_with_key
+from safe_notification_service.ether.tests.factories import \
+    get_eth_address_with_key
 
 from ..validators import validate_checksumed_address
 

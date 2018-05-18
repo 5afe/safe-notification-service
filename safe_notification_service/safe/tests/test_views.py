@@ -5,11 +5,12 @@ from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from safe_notification_service.ether.tests.factories import get_eth_address_with_key
+from safe_notification_service.ether.tests.factories import \
+    get_eth_address_with_key
 
 from ..models import Device, DevicePair
-from .factories import (get_auth_mock_data, get_pairing_mock_data,
-                        get_signature_json)
+from .factories import (get_auth_mock_data, get_notification_mock_data,
+                        get_pairing_mock_data, get_signature_json)
 
 faker = Faker()
 
@@ -112,3 +113,26 @@ class TestViews(APITestCase):
 
         with self.assertRaises(DevicePair.DoesNotExist):
             DevicePair.objects.get(authorized_device__owner=device_address)
+
+    def test_notification_creation(self):
+        data = get_notification_mock_data()
+
+        request = self.client.post(reverse('v1:notifications'),
+                                   data=json.dumps(data),
+                                   content_type='application/json')
+        self.assertEquals(request.status_code, status.HTTP_404_NOT_FOUND)
+
+        chrome_address, _ = get_eth_address_with_key()
+        device_address, device_key = get_eth_address_with_key()
+        d1 = Device.objects.create(push_token=faker.name(), owner=chrome_address)
+        d2 = Device.objects.create(push_token=faker.name(), owner=device_address)
+        DevicePair.objects.create(authorizing_device=d1, authorized_device=d2)
+        DevicePair.objects.create(authorizing_device=d2, authorized_device=d1)
+
+        data = get_notification_mock_data(devices=[chrome_address], eth_address_and_key=(device_address, device_key))
+
+        request = self.client.post(reverse('v1:notifications'),
+                                   data=json.dumps(data),
+                                   content_type='application/json')
+
+        self.assertEquals(request.status_code, status.HTTP_204_NO_CONTENT)

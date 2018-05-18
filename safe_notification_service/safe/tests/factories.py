@@ -7,7 +7,8 @@ from faker import Factory as FakerFactory
 from faker import Faker
 
 from safe_notification_service.ether.signing import EthereumSigner
-from safe_notification_service.ether.tests.factories import get_eth_address_with_key
+from safe_notification_service.ether.tests.factories import \
+    get_eth_address_with_key
 
 from ..serializers import isoformat_without_ms
 
@@ -68,14 +69,18 @@ def get_pairing_mock_data(expiration_date=None, chrome_key=None, chrome_address=
     }
 
 
-def get_notification_mock_data(devices=None):
+def get_notification_mock_data(devices=None, eth_address_and_key: Tuple[str, str]= None):
     """ Generates a dictionary data specifying a notification message """
-    message = json.dumps({'title': faker.name()})
-    eth_address, eth_key = get_eth_address_with_key()
-    eth_address2, _ = get_eth_address_with_key()
-    eth_address3, _ = get_eth_address_with_key()
+    message = json.dumps({'my_message': faker.name(), 'my_another_key': faker.name()})
+
+    if eth_address_and_key:
+        eth_address, eth_key = eth_address_and_key
+    else:
+        eth_address, eth_key = get_eth_address_with_key()
 
     if not devices:
+        eth_address2, _ = get_eth_address_with_key()
+        eth_address3, _ = get_eth_address_with_key()
         devices = [eth_address2, eth_address3]
 
     return {

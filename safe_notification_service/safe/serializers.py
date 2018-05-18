@@ -190,9 +190,7 @@ class NotificationSerializer(SignedMessageSerializer):
         try:
             json.loads(data)
         except json.JSONDecodeError:
-            raise ValidationError("message must be a valid stringified JSON")
-        except Exception as e:
-            pass
+            raise ValidationError("Message must be a valid stringified JSON")
         return data
 
     def validate(self, data):
