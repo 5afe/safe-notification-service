@@ -38,8 +38,11 @@ class AuthCreationView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            device = serializer.save()
+            return Response(status=status.HTTP_201_CREATED, data={
+                'owner': device.owner,
+                'push_token': device.push_token
+            })
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
@@ -62,8 +65,11 @@ class PairingView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            instance = serializer.save()
+            return Response(status=status.HTTP_201_CREATED, data={
+                'device_pair': [instance.authorizing_device.owner,
+                                instance.authorized_device.owner]
+            })
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 

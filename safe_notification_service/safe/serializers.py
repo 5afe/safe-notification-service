@@ -162,7 +162,7 @@ class PairingSerializer(SignedMessageSerializer):
         owner_device = Device.objects.get_or_create_without_push_token(owner)
 
         # Do pairing
-        instance, _ = DevicePair.objects.update_or_create(
+        device_pair, _ = DevicePair.objects.update_or_create(
             authorizing_device=owner_device,
             authorized_device=chrome_device,
         )
@@ -172,7 +172,7 @@ class PairingSerializer(SignedMessageSerializer):
             authorized_device=owner_device,
         )
 
-        return instance
+        return device_pair
 
 
 class PairingDeletionSerializer(SignedMessageSerializer):
