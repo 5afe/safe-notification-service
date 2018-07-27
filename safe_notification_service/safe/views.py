@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db.models import Q
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
@@ -11,7 +12,8 @@ from safe_notification_service.safe.models import Device, DevicePair
 from safe_notification_service.version import __version__
 
 from .serializers import (AuthSerializer, NotificationSerializer,
-                          PairingDeletionSerializer, PairingSerializer)
+                          PairingDeletionSerializer, PairingSerializer, AuthResponseSerializer,
+                          PairingResponseSerializer)
 
 
 class AboutView(APIView):
@@ -36,14 +38,22 @@ class AuthCreationView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = AuthSerializer
 
+    @swagger_auto_schema(responses={201: AuthResponseSerializer(),
+                                    400: 'Invalid data'})
     def post(self, request, *args, **kwargs):
+        """
+        Links a `push_token` to a `owner`. If this endpoint is called again with the same `owner`,
+        it will be updated with the new `push_token`
+        """
         serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
             device = serializer.save()
-            return Response(status=status.HTTP_201_CREATED, data={
+            response_serializer = AuthResponseSerializer(data={
                 'owner': device.owner,
                 'push_token': device.push_token
             })
+            assert response_serializer.is_valid()
+            return Response(status=status.HTTP_201_CREATED, data=response_serializer.data)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
@@ -63,18 +73,30 @@ class PairingView(CreateAPIView):
         else:
             raise exc
 
+    @swagger_auto_schema(responses={201: PairingResponseSerializer(),
+                                    400: 'Invalid data'})
     def post(self, request, *args, **kwargs):
+        """
+        Pairs 2 devices
+        """
         serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
-            return Response(status=status.HTTP_201_CREATED, data={
+            response_serializer = PairingResponseSerializer(data={
                 'device_pair': [instance.authorizing_device.owner,
                                 instance.authorized_device.owner]
             })
+            assert response_serializer.is_valid()
+            return Response(status=status.HTTP_201_CREATED, data=response_serializer.data)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
+    @swagger_auto_schema(responses={204: 'Pair was deleted',
+                                    400: 'Invalid data'})
     def delete(self, request, *args, **kwargs):
+        """
+        Delete pairing between 2 devices
+        """
         serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
             signer_address = serializer.validated_data['signing_address']
@@ -94,7 +116,13 @@ class NotificationView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = NotificationSerializer
 
+    @swagger_auto_schema(responses={204: 'Notification was queued',
+                                    400: 'Invalid data',
+                                    404: 'No pairing found'})
     def post(self, request, *args, **kwargs):
+        """
+        Send notification to device/s
+        """
         serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
             if serializer.save():
