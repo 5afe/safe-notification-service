@@ -6,6 +6,7 @@ from typing import Any, Dict, Tuple
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
+from ethereum.transactions import secpk1n
 from ethereum.utils import checksum_encode
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -26,12 +27,10 @@ def isoformat_without_ms(date_time):
 # ================================================ #
 #                Base Serializers
 # ================================================ #
-
-
 class SignatureSerializer(serializers.Serializer):
-    v = serializers.IntegerField(min_value=0, max_value=30)
-    r = serializers.IntegerField(min_value=0)
-    s = serializers.IntegerField(min_value=0)
+    v = serializers.IntegerField(min_value=27, max_value=30)
+    r = serializers.IntegerField(min_value=1, max_value=secpk1n - 1)
+    s = serializers.IntegerField(min_value=1, max_value=secpk1n // 2)
 
 
 # ================================================ #
@@ -162,7 +161,7 @@ class PairingSerializer(SignedMessageSerializer):
         owner_device = Device.objects.get_or_create_without_push_token(owner)
 
         # Do pairing
-        instance, _ = DevicePair.objects.update_or_create(
+        device_pair, _ = DevicePair.objects.update_or_create(
             authorizing_device=owner_device,
             authorized_device=chrome_device,
         )
@@ -172,7 +171,7 @@ class PairingSerializer(SignedMessageSerializer):
             authorized_device=owner_device,
         )
 
-        return instance
+        return device_pair
 
 
 class PairingDeletionSerializer(SignedMessageSerializer):

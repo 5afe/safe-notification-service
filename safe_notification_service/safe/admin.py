@@ -9,7 +9,8 @@ class DeviceAdmin(admin.ModelAdmin):
            'fields': ('push_token', 'owner',)
         }),
     )
-    list_display = ('push_token', 'owner',)
+    list_display = ('created', 'push_token', 'owner',)
+    readonly_fields = ('created', 'modified')
 
 
 class DevicePairAdmin(admin.ModelAdmin):
@@ -18,7 +19,8 @@ class DevicePairAdmin(admin.ModelAdmin):
            'fields': ('authorizing_device', 'authorized_device',)
         }),
     )
-    list_display = ('authorizing_device', 'authorized_device',)
+    list_display = ('created', 'authorizing_device', 'authorized_device',)
+    readonly_fields = ('created', 'modified')
 
 
 admin.site.register(Device, DeviceAdmin)

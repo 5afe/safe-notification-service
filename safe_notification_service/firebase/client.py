@@ -25,10 +25,8 @@ class MessagingClient(ABC):
         raise NotImplementedError
 
 
-
 @singleton
 class FirebaseClient(MessagingClient):
-
     def __init__(self, credentials, *args, **kwargs):
         self._credentials = credentials
         self._authenticate(*args, **kwargs)
@@ -70,4 +68,4 @@ class MockedClient(MessagingClient):
 
     def send_message(self, data, token):
         logger.warning("MockedClient: Not sending message with data %s and token %s", data, token)
-        return True
+        return 'MockedResponse'

@@ -21,6 +21,7 @@ class AboutView(APIView):
         content = {
             'version': __version__,
             'api_version': self.request.version,
+            'https_detected': self.request.is_secure(),
             'settings': {
                 'ETH_HASH_PREFIX ': settings.ETH_HASH_PREFIX,
                 'FIREBASE_CREDENTIALS_PATH': settings.FIREBASE_CREDENTIALS_PATH,
@@ -36,16 +37,25 @@ class AuthCreationView(CreateAPIView):
     serializer_class = AuthSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            device = serializer.save()
+            return Response(status=status.HTTP_201_CREATED, data={
+                'owner': device.owner,
+                'push_token': device.push_token
+            })
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
 
-class PairingView(APIView):
+class PairingView(CreateAPIView):
     permission_classes = (AllowAny,)
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return PairingSerializer
+        elif self.request.method == 'DELETE':
+            return PairingDeletionSerializer
 
     def handle_exception(self, exc):
         if isinstance(exc, Device.DoesNotExist):
@@ -54,15 +64,18 @@ class PairingView(APIView):
             raise exc
 
     def post(self, request, *args, **kwargs):
-        serializer = PairingSerializer(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            instance = serializer.save()
+            return Response(status=status.HTTP_201_CREATED, data={
+                'device_pair': [instance.authorizing_device.owner,
+                                instance.authorized_device.owner]
+            })
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
     def delete(self, request, *args, **kwargs):
-        serializer = PairingDeletionSerializer(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
             signer_address = serializer.validated_data['signing_address']
             device_address = serializer.validated_data['device']
@@ -77,12 +90,12 @@ class PairingView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
 
-class NotificationView(APIView):
+class NotificationView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = NotificationSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
             if serializer.save():
                 # At least one pairing found

@@ -25,6 +25,9 @@ class TestViews(APITestCase):
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, auth_data['push_token'])
+        response = request.json()
+        self.assertEqual(response['owner'], eth_account)
+        self.assertEqual(response['pushToken'], auth_data['push_token'])
 
         # Try repeating the request with same push token and address
         request = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
@@ -37,6 +40,9 @@ class TestViews(APITestCase):
                                    content_type='application/json')
         self.assertEquals(request.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, auth_data['push_token'])
+        response = request.json()
+        self.assertEqual(response['owner'], eth_account)
+        self.assertEqual(response['pushToken'], auth_data['push_token'])
 
     def test_auth_fail(self):
         request = self.client.post(reverse('v1:auth-creation'), data=json.dumps({}),
@@ -51,20 +57,15 @@ class TestViews(APITestCase):
         Device.objects.create(push_token=faker.name(), owner=chrome_address)
         Device.objects.create(push_token=faker.name(), owner=device_address)
 
-        request = self.client.post(reverse('v1:pairing'),
-                                   data=json.dumps(data),
-                                   content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
-
-        self.assertEquals(DevicePair.objects.count(), 2)
-
         # Repeat same request (make sure creation is idempotent)
-        request = self.client.post(reverse('v1:pairing'),
-                                   data=json.dumps(data),
-                                   content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
-
-        self.assertEquals(DevicePair.objects.count(), 2)
+        for _ in range(0, 2):
+            request = self.client.post(reverse('v1:pairing'),
+                                       data=json.dumps(data),
+                                       content_type='application/json')
+            self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+            response = request.json()
+            self.assertEqual(set(response['devicePair']), set([chrome_address, device_address]))
+            self.assertEquals(DevicePair.objects.count(), 2)
 
     def test_pairing_creation_without_auth(self):
         """
