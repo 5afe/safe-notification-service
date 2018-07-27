@@ -21,6 +21,7 @@ class AboutView(APIView):
         content = {
             'version': __version__,
             'api_version': self.request.version,
+            'https_detected': self.request.is_secure(),
             'settings': {
                 'ETH_HASH_PREFIX ': settings.ETH_HASH_PREFIX,
                 'FIREBASE_CREDENTIALS_PATH': settings.FIREBASE_CREDENTIALS_PATH,
