@@ -265,3 +265,13 @@ class GoogleInAppPurchaseSerializer(serializers.Serializer):
         data['package_name'] = signed_data['packageName']
 
         return data
+
+
+# Response serializers
+class AuthResponseSerializer(serializers.Serializer):
+    owner = EthereumAddressField()
+    push_token = serializers.CharField()
+
+
+class PairingResponseSerializer(serializers.Serializer):
+    device_pair = serializers.ListField(child=EthereumAddressField(), min_length=2)
