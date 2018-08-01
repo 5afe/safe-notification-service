@@ -27,6 +27,21 @@ class MessagingClient(ABC):
 
 @singleton
 class FirebaseClient(MessagingClient):
+
+    # Data for the Apple Push Notification Service
+    apns = messaging.APNSConfig(
+        headers={'apns-priority': '10'},
+        payload=messaging.APNSPayload(
+            aps=messaging.Aps(
+                alert=messaging.ApsAlert(
+                    title_loc_key='push.signature_request',
+                ),
+                badge=1,
+                sound='default',
+            ),
+        ),
+    )
+
     def __init__(self, credentials, *args, **kwargs):
         self._credentials = credentials
         self._authenticate(*args, **kwargs)
@@ -49,6 +64,7 @@ class FirebaseClient(MessagingClient):
     def send_message(self, data, token):
         logger.debug("Sending data=%s with token=%s", data, token)
         message = messaging.Message(
+            apns=self.apns,
             data=data,
             token=token
         )
