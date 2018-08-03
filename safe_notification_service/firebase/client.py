@@ -33,6 +33,9 @@ class FirebaseClient(MessagingClient):
         headers={'apns-priority': '10'},
         payload=messaging.APNSPayload(
             aps=messaging.Aps(
+                alert=messaging.ApsAlert(
+                    title_loc_key='push.signature_request',
+                ),
                 mutable_content=1,
                 badge=1,
                 sound='default',
