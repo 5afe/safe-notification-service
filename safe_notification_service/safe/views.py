@@ -11,9 +11,9 @@ from rest_framework.views import APIView
 from safe_notification_service.safe.models import Device, DevicePair
 from safe_notification_service.version import __version__
 
-from .serializers import (AuthSerializer, NotificationSerializer,
-                          PairingDeletionSerializer, PairingSerializer, AuthResponseSerializer,
-                          PairingResponseSerializer)
+from .serializers import (AuthResponseSerializer, AuthSerializer,
+                          NotificationSerializer, PairingDeletionSerializer,
+                          PairingResponseSerializer, PairingSerializer)
 
 
 class AboutView(APIView):
