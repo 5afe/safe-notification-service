@@ -1,7 +1,6 @@
 from django.db import models
+from django_eth.models import EthereumAddressField
 from model_utils.models import TimeStampedModel
-
-from .validators import validate_checksumed_address
 
 
 class DeviceManager(models.Manager):
@@ -18,11 +17,7 @@ class Device(TimeStampedModel):
         null=True,
         blank=True,
     )
-    owner = models.CharField(
-        max_length=42,
-        primary_key=True,
-        validators=[validate_checksumed_address],
-    )
+    owner = EthereumAddressField(primary_key=True)
 
     class Meta:
         verbose_name = 'Device'

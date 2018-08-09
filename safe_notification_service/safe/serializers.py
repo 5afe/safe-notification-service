@@ -6,8 +6,7 @@ from typing import Any, Dict, Tuple
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
-from ethereum.transactions import secpk1n
-from ethereum.utils import checksum_encode
+from django_eth.serializers import EthereumAddressField, SignatureSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -22,41 +21,6 @@ logger = logging.getLogger(__name__)
 
 def isoformat_without_ms(date_time):
     return date_time.replace(microsecond=0).isoformat()
-
-
-# ================================================ #
-#                Base Serializers
-# ================================================ #
-class SignatureSerializer(serializers.Serializer):
-    v = serializers.IntegerField(min_value=27, max_value=30)
-    r = serializers.IntegerField(min_value=1, max_value=secpk1n - 1)
-    s = serializers.IntegerField(min_value=1, max_value=secpk1n // 2)
-
-
-# ================================================ #
-#                Custom Fields
-# ================================================ #
-class EthereumAddressField(serializers.Field):
-    """
-    Ethereum address checksumed
-    https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
-    """
-
-    def to_representation(self, obj):
-        return obj
-
-    def to_internal_value(self, data):
-        # Check if address is valid
-
-        try:
-            if checksum_encode(data) != data:
-                raise ValueError
-        except ValueError:
-            raise ValidationError("Address %s is not checksumed" % data)
-        except Exception:
-            raise ValidationError("Address %s is not valid" % data)
-
-        return data
 
 
 # ================================================ #
@@ -267,7 +231,9 @@ class GoogleInAppPurchaseSerializer(serializers.Serializer):
         return data
 
 
-# Response serializers
+# ================================================ #
+#                 Response Serializers
+# ================================================ #
 class AuthResponseSerializer(serializers.Serializer):
     owner = EthereumAddressField()
     push_token = serializers.CharField()
