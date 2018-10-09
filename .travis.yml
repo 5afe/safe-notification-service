@@ -10,6 +10,8 @@ env:
   - PIP_USE_MIRRORS=true
   - DJANGO_SETTINGS_MODULE=config.settings.test
   - DATABASE_URL=psql://postgres@localhost/travisci
+addons:
+  postgresql: "9.4"
 services:
   - postgresql
   - docker
