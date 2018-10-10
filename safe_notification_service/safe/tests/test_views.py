@@ -23,7 +23,7 @@ class TestViews(APITestCase):
 
         request = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, auth_data['push_token'])
         response = request.json()
         self.assertEqual(response['owner'], eth_account)
@@ -32,13 +32,13 @@ class TestViews(APITestCase):
         # Try repeating the request with same push token and address
         request = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(request.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Try repeating the request with different push token but same address
         auth_data = get_auth_mock_data(key=eth_key)
         request = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, auth_data['push_token'])
         response = request.json()
         self.assertEqual(response['owner'], eth_account)
@@ -47,7 +47,7 @@ class TestViews(APITestCase):
     def test_auth_fail(self):
         request = self.client.post(reverse('v1:auth-creation'), data=json.dumps({}),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(request.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_pairing_creation(self):
         chrome_address, chrome_key = get_eth_address_with_key()
@@ -62,10 +62,10 @@ class TestViews(APITestCase):
             request = self.client.post(reverse('v1:pairing'),
                                        data=json.dumps(data),
                                        content_type='application/json')
-            self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(request.status_code, status.HTTP_201_CREATED)
             response = request.json()
             self.assertEqual(set(response['devicePair']), set([chrome_address, device_address]))
-            self.assertEquals(DevicePair.objects.count(), 2)
+            self.assertEqual(DevicePair.objects.count(), 2)
 
     def test_pairing_creation_without_auth(self):
         """
@@ -79,9 +79,9 @@ class TestViews(APITestCase):
         request = self.client.post(reverse('v1:pairing'),
                                    data=json.dumps(data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
 
-        self.assertEquals(DevicePair.objects.count(), 2)
+        self.assertEqual(DevicePair.objects.count(), 2)
 
         self.assertIsNone(Device.objects.get(owner=chrome_address).push_token)
         self.assertIsNone(Device.objects.get(owner=device_address).push_token)
@@ -97,7 +97,7 @@ class TestViews(APITestCase):
         request = self.client.post(reverse('v1:pairing'),
                                    data=json.dumps(pairing_data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
 
         deletion_data = {
             'device': device_address,
@@ -108,7 +108,7 @@ class TestViews(APITestCase):
                                      data=json.dumps(deletion_data),
                                      content_type='application/json')
 
-        self.assertEquals(request.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(request.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(DevicePair.DoesNotExist):
             DevicePair.objects.get(authorizing_device__owner=device_address)
 
@@ -121,7 +121,7 @@ class TestViews(APITestCase):
         request = self.client.post(reverse('v1:notifications'),
                                    data=json.dumps(data),
                                    content_type='application/json')
-        self.assertEquals(request.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(request.status_code, status.HTTP_404_NOT_FOUND)
 
         chrome_address, _ = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
@@ -136,4 +136,4 @@ class TestViews(APITestCase):
                                    data=json.dumps(data),
                                    content_type='application/json')
 
-        self.assertEquals(request.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(request.status_code, status.HTTP_204_NO_CONTENT)

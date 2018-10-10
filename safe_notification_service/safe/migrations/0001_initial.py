@@ -4,6 +4,7 @@ import django.db.models.deletion
 import django.utils.timezone
 import model_utils.fields
 from django.db import migrations, models
+from django_eth.validators import validate_checksumed_address
 
 import safe_notification_service.safe.models
 
@@ -22,7 +23,7 @@ class Migration(migrations.Migration):
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('push_token', models.CharField(max_length=150, unique=True, verbose_name='push_token')),
-                ('owner', models.CharField(max_length=42, primary_key=True, serialize=False, validators=[safe_notification_service.safe.models.validate_checksumed_address], verbose_name='owner')),
+                ('owner', models.CharField(max_length=42, primary_key=True, serialize=False, validators=[validate_checksumed_address], verbose_name='owner')),
             ],
             options={
                 'verbose_name': 'device',

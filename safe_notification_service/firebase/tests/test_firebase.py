@@ -14,7 +14,7 @@ class TestFirebase(TestCase):
         self.firebase_messaging = MessagingService(self.firebase_client.app)
 
     def test_authentication(self):
-        self.assertEquals(self.firebase_client._app._project_id, 'mock-project-id')
+        self.assertEqual(self.firebase_client._app._project_id, 'mock-project-id')
 
     def test_send_message(self):
         response = self.firebase_client.send_message(message_instance=self.firebase_messaging,
