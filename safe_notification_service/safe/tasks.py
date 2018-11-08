@@ -32,6 +32,5 @@ def send_notification(self, message: str, push_token: str) -> None:
     try:
         firebase_client.send_message(message, push_token)
     except Exception as exc:
-        logger.error(exc, exc_info=True)
-        logger.warning('Retry sending message with push_token=%s' % push_token)
+        logger.error('Message=%s push-token=%s exception=%s' % (message, push_token, exc), exc_info=True)
         self.retry(exc=exc)
