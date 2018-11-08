@@ -32,5 +32,12 @@ def send_notification(self, message: str, push_token: str) -> None:
     try:
         firebase_client.send_message(message, push_token)
     except Exception as exc:
-        logger.error('Message=%s push-token=%s exception=%s' % (message, push_token, exc), exc_info=True)
-        self.retry(exc=exc)
+        str_exc = str(exc)
+        if 'Requested entity was not found' in str_exc:
+            # Push token not valid
+            logger.waning('Push token not valid. Message=%s push-token=%s exception=%s' %
+                          (message, push_token, str_exc),
+                          exc_info=True)
+        else:
+            logger.error('Message=%s push-token=%s exception=%s' % (message, push_token, str_exc), exc_info=True)
+            self.retry(exc=exc)
