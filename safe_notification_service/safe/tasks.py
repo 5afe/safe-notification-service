@@ -35,7 +35,7 @@ def send_notification(self, message: str, push_token: str) -> None:
         str_exc = str(exc)
         if 'Requested entity was not found' in str_exc:
             # Push token not valid
-            logger.waning('Push token not valid. Message=%s push-token=%s exception=%s' %
+            logger.warning('Push token not valid. Message=%s push-token=%s exception=%s' %
                           (message, push_token, str_exc),
                           exc_info=True)
         else:
