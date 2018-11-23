@@ -80,15 +80,18 @@ class FirebaseClient(MessagingClient):
 
     def verify_token(self, token: str) -> bool:
         """
-        Check if a token is valid on firebase for the project
+        Check if a token is valid on firebase for the project. Only way to do it is simulating a message send
         :param token: Firebase client token
         :return: True if valid, False otherwise
         """
         try:
-            decoded_token = auth.verify_id_token(token, check_revoked=True)
-            logger.debug('Decoded token=%s: %s', token, decoded_token)
+            message = messaging.Message(
+                data={},
+                token=token
+            )
+            messaging.send(message, dry_run=True)
             return True
-        except (ValueError, auth.AuthError):
+        except messaging.ApiCallError:
             return False
 
     def send_message(self, data, token):
