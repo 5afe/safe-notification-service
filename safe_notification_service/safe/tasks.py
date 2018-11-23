@@ -2,24 +2,11 @@ from celery import app
 from celery.utils.log import get_task_logger
 from django.conf import settings
 
-from safe_notification_service.firebase.client import (FirebaseClient,
-                                                       MockedClient)
+from safe_notification_service.firebase.client import FirebaseProvider
 
 logger = get_task_logger(__name__)
 oid = 'SAFE_NOTIFICATION_SERVICE'
-
-
-firebase_client = None
-try:
-    firebase_client = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
-except AttributeError:
-    logger.warning('FIREBASE_AUTH_CREDENTIALS not found in settings')
-except Exception as e:
-    logger.warning(e, exc_info=True)
-finally:
-    if not firebase_client:
-        logger.warning('Using mocked notification client')
-        firebase_client = MockedClient()
+firebase_client = FirebaseProvider()
 
 
 @app.shared_task(bind=True,
@@ -35,9 +22,8 @@ def send_notification(self, message: str, push_token: str) -> None:
         str_exc = str(exc)
         if 'Requested entity was not found' in str_exc:
             # Push token not valid
-            logger.warning('Push token not valid. Message=%s push-token=%s exception=%s' %
-                          (message, push_token, str_exc),
-                          exc_info=True)
+            logger.warning('Push token not valid. Message=%s push-token=%s exception=%s',
+                           message, push_token, str_exc, exc_info=True)
         else:
-            logger.error('Message=%s push-token=%s exception=%s' % (message, push_token, str_exc), exc_info=True)
+            logger.error('Message=%s push-token=%s exception=%s', message, push_token, str_exc, exc_info=True)
             self.retry(exc=exc)

@@ -11,12 +11,14 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from safe_notification_service.ether.signing import EthereumSignedMessage
+from safe_notification_service.firebase.client import FirebaseProvider
 from safe_notification_service.safe.models import Device, DevicePair
 from safe_notification_service.safe.tasks import send_notification
 
 from .helpers import validate_google_billing_purchase
 
 logger = logging.getLogger(__name__)
+firebase_client = FirebaseProvider()
 
 
 def isoformat_without_ms(date_time):
@@ -64,7 +66,10 @@ class AuthSerializer(SignedMessageSerializer):
             Device.objects.get(push_token=value)
             raise ValidationError('Push token %s already in use' % value)
         except Device.DoesNotExist:
-            return value
+            if firebase_client.verify_token(value):
+                return value
+            else:
+                raise ValidationError('Push token %s not valid for this project' % value)
 
     def create(self, validated_data):
         owner = validated_data['signing_address']

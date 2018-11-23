@@ -1,15 +1,32 @@
 from abc import ABC, abstractmethod
 from logging import getLogger
 
-from firebase_admin import credentials, initialize_app, messaging
+from firebase_admin import auth, credentials, initialize_app, messaging
 
 from safe_notification_service.utils.singleton import singleton
 
 logger = getLogger(__name__)
 
 
-class MessagingClient(ABC):
+class FirebaseProvider:
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            from django.conf import settings
+            cls.instance = None
+            try:
+                cls.instance = FirebaseClient(credentials=settings.FIREBASE_AUTH_CREDENTIALS)
+            except AttributeError:
+                logger.warning('FIREBASE_AUTH_CREDENTIALS not found in settings')
+            except Exception as e:
+                logger.warning(e, exc_info=True)
+            finally:
+                if not cls.instance:
+                    logger.warning('Using mocked notification client')
+                    cls.instance = MockedClient()
+        return cls.instance
 
+
+class MessagingClient(ABC):
     @property
     @abstractmethod
     def auth_provider(self):
@@ -27,7 +44,6 @@ class MessagingClient(ABC):
 
 @singleton
 class FirebaseClient(MessagingClient):
-
     # Data for the Apple Push Notification Service
     apns = messaging.APNSConfig(
         headers={'apns-priority': '10'},
@@ -62,6 +78,19 @@ class FirebaseClient(MessagingClient):
     def app(self):
         return self._app
 
+    def verify_token(self, token: str) -> bool:
+        """
+        Check if a token is valid on firebase for the project
+        :param token: Firebase client token
+        :return: True if valid, False otherwise
+        """
+        try:
+            decoded_token = auth.verify_id_token(token, check_revoked=True)
+            logger.debug('Decoded token=%s: %s', token, decoded_token)
+            return True
+        except (ValueError, auth.AuthError):
+            return False
+
     def send_message(self, data, token):
         logger.debug("Sending data=%s with token=%s", data, token)
         message = messaging.Message(
@@ -82,6 +111,9 @@ class MockedClient(MessagingClient):
     @property
     def app(self):
         return None
+
+    def verify_token(self, token: str) -> bool:
+        return True
 
     def send_message(self, data, token):
         logger.warning("MockedClient: Not sending message with data %s and token %s", data, token)
