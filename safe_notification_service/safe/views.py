@@ -13,7 +13,7 @@ from safe_notification_service.version import __version__
 
 from .serializers import (AuthResponseSerializer, AuthSerializer,
                           NotificationSerializer, PairingDeletionSerializer,
-                          PairingResponseSerializer, PairingSerializer)
+                          PairingResponseSerializer, PairingSerializer, SimpleNotificationSerializer)
 
 
 class AboutView(APIView):
@@ -132,3 +132,7 @@ class NotificationView(CreateAPIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
+
+
+class SimpleNotificationView(NotificationView):
+    serializer_class = SimpleNotificationSerializer

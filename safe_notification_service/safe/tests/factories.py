@@ -3,7 +3,7 @@ from datetime import timedelta
 from typing import Tuple
 
 from django.utils import timezone
-from faker import Factory as FakerFactory
+import factory
 from faker import Faker
 
 from safe_notification_service.ether.signing import EthereumSigner
@@ -11,9 +11,25 @@ from safe_notification_service.ether.tests.factories import \
     get_eth_address_with_key
 
 from ..serializers import isoformat_without_ms
+from ..models import Device, DevicePair
 
-fakerFactory = FakerFactory.create()
 faker = Faker()
+
+
+class DeviceFactory(factory.DjangoModelFactory):
+    push_token = factory.Faker('sha256', raw_output=False)
+    owner = factory.LazyFunction(lambda: get_eth_address_with_key()[0])
+
+    class Meta:
+        model = Device
+
+
+class DevicePairFactory(factory.DjangoModelFactory):
+    authorizing_device = factory.SubFactory(DeviceFactory)
+    authorized_device = factory.SubFactory(DeviceFactory)
+
+    class Meta:
+        model = DevicePair
 
 
 def get_signature_json(message, key):

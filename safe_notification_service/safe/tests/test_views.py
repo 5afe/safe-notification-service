@@ -10,7 +10,7 @@ from safe_notification_service.ether.tests.factories import \
 
 from ..models import Device, DevicePair
 from .factories import (get_auth_mock_data, get_notification_mock_data,
-                        get_pairing_mock_data, get_signature_json)
+                        get_pairing_mock_data, get_signature_json, DeviceFactory, DevicePairFactory)
 
 faker = Faker()
 
@@ -137,3 +137,25 @@ class TestViews(APITestCase):
                                    content_type='application/json')
 
         self.assertEqual(request.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_simple_notification_creation(self):
+        random_address, _ = get_eth_address_with_key()
+        message = '{}'
+        data = {
+            'devices': [random_address],
+            'message': message,
+        }
+        response = self.client.post(reverse('v1:simple-notifications'), data=data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual('Owner=%s not found' % random_address, response.json()[0])
+
+        device_pair = DevicePairFactory()
+        d1 = device_pair.authorizing_device
+        d2 = device_pair.authorized_device
+
+        data = {
+            'devices': [d1.owner, d2.owner],
+            'message': message,
+        }
+        response = self.client.post(reverse('v1:simple-notifications'), data=data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

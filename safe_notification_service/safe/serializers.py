@@ -205,6 +205,50 @@ class NotificationSerializer(SignedMessageSerializer):
         return {}
 
 
+class SimpleNotificationSerializer(serializers.Serializer):
+    devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
+    message = serializers.CharField()
+
+    def validate_message(self, value):
+        try:
+            json.loads(value)
+        except json.JSONDecodeError:
+            raise ValidationError("Message must be a valid stringified JSON")
+        return value
+
+    def validate_devices(self, value):
+        if len(set(value)) != len(value):
+            raise ValidationError("Duplicated addresses are forbidden")
+        return value
+
+    def create(self, validated_data):
+        """
+        Takes care of getting the valid device pairs for the signing user and
+        sends the notifications.
+        """
+        devices = []
+        for owner in validated_data['devices']:
+            try:
+                devices.append(Device.objects.get(owner=owner))
+            except Device.DoesNotExist:
+                raise ValidationError('Owner=%s not found' % owner)
+
+        # convert message to JSON
+        message = json.loads(validated_data['message'])
+
+        for device in devices:
+            # Call celery task for sending notification
+            if device.push_token:
+                send_notification.delay(message, device.push_token)
+            else:
+                logger.warning("Address %s has no push_token", device.owner)
+
+        return devices
+
+    def to_representation(self, instance):
+        return {}
+
+
 class GoogleInAppPurchaseSerializer(serializers.Serializer):
     signed_data = serializers.CharField(min_length=1)
     signature = serializers.CharField(min_length=344, max_length=344)
