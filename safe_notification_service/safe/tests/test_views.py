@@ -55,8 +55,8 @@ class TestViews(APITestCase):
         device_address, device_key = get_eth_address_with_key()
         data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
 
-        Device.objects.create(push_token=faker.name(), owner=chrome_address)
-        Device.objects.create(push_token=faker.name(), owner=device_address)
+        DeviceFactory(owner=chrome_address)
+        DeviceFactory(owner=device_address)
 
         # Repeat same request (make sure creation is idempotent)
         for _ in range(0, 2):
@@ -92,8 +92,8 @@ class TestViews(APITestCase):
         device_address, device_key = get_eth_address_with_key()
         pairing_data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
 
-        Device.objects.create(push_token=faker.name(), owner=chrome_address)
-        Device.objects.create(push_token=faker.name(), owner=device_address)
+        DeviceFactory(owner=chrome_address)
+        DeviceFactory(owner=device_address)
 
         response = self.client.post(reverse('v1:pairing'),
                                     data=json.dumps(pairing_data),
@@ -126,10 +126,10 @@ class TestViews(APITestCase):
 
         chrome_address, _ = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
-        d1 = Device.objects.create(push_token=faker.name(), owner=chrome_address)
-        d2 = Device.objects.create(push_token=faker.name(), owner=device_address)
-        DevicePair.objects.create(authorizing_device=d1, authorized_device=d2)
-        DevicePair.objects.create(authorizing_device=d2, authorized_device=d1)
+        d1 = DeviceFactory(owner=chrome_address)
+        d2 = DeviceFactory(owner=device_address)
+        DevicePairFactory(authorizing_device=d1, authorized_device=d2)
+        DevicePairFactory(authorizing_device=d2, authorized_device=d1)
 
         data = get_notification_mock_data(devices=[chrome_address], eth_address_and_key=(device_address, device_key))
 
