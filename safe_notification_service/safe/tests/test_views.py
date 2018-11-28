@@ -147,8 +147,7 @@ class TestViews(APITestCase):
             'message': message,
         }
         response = self.client.post(reverse('v1:simple-notifications'), data=data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual('Owner=%s not found' % random_address, response.json()[0])
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         device_pair = DevicePairFactory()
         d1 = device_pair.authorizing_device

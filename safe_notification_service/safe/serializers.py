@@ -231,7 +231,8 @@ class SimpleNotificationSerializer(serializers.Serializer):
             try:
                 devices.append(Device.objects.get(owner=owner))
             except Device.DoesNotExist:
-                raise ValidationError('Owner=%s not found' % owner)
+                pass
+                # raise ValidationError('Owner=%s not found' % owner)
 
         # convert message to JSON
         message = json.loads(validated_data['message'])
