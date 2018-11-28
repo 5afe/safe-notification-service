@@ -9,8 +9,9 @@ from safe_notification_service.ether.tests.factories import \
     get_eth_address_with_key
 
 from ..models import Device, DevicePair
-from .factories import (get_auth_mock_data, get_notification_mock_data,
-                        get_pairing_mock_data, get_signature_json, DeviceFactory, DevicePairFactory)
+from .factories import (DeviceFactory, DevicePairFactory, get_auth_mock_data,
+                        get_notification_mock_data, get_pairing_mock_data,
+                        get_signature_json)
 
 faker = Faker()
 

@@ -13,7 +13,8 @@ from safe_notification_service.version import __version__
 
 from .serializers import (AuthResponseSerializer, AuthSerializer,
                           NotificationSerializer, PairingDeletionSerializer,
-                          PairingResponseSerializer, PairingSerializer, SimpleNotificationSerializer)
+                          PairingResponseSerializer, PairingSerializer,
+                          SimpleNotificationSerializer)
 
 
 class AboutView(APIView):

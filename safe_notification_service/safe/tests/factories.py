@@ -2,16 +2,16 @@ import json
 from datetime import timedelta
 from typing import Tuple
 
-from django.utils import timezone
 import factory
+from django.utils import timezone
 from faker import Faker
 
 from safe_notification_service.ether.signing import EthereumSigner
 from safe_notification_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..serializers import isoformat_without_ms
 from ..models import Device, DevicePair
+from ..serializers import isoformat_without_ms
 
 faker = Faker()
 
