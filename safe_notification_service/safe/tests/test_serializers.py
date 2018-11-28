@@ -26,16 +26,13 @@ class TestSerializers(TestCase):
         eth_address, eth_key = get_eth_address_with_key()
         data = get_auth_mock_data(eth_key)
 
-        ethereum_signed_message = EthereumSignedMessage(data['push_token'], data['signature']['v'], data['signature']['r'], data['signature']['s'])
-
+        ethereum_signed_message = EthereumSignedMessage(data['push_token'], data['signature']['v'],
+                                                        data['signature']['r'], data['signature']['s'])
         push_token_hash = ethereum_signed_message.message_hash
 
         auth_serializer = AuthSerializer(data=data)
-
         self.assertTrue(auth_serializer.is_valid())
-
         self.assertEqual(auth_serializer.validated_data['message_hash'], push_token_hash)
-
         self.assertEqual(auth_serializer.validated_data['signing_address'], eth_address)
 
         bad_auth_data = {
@@ -44,7 +41,6 @@ class TestSerializers(TestCase):
         }
 
         auth_serializer = AuthSerializer(data=bad_auth_data)
-
         self.assertRaises(ValidationError, auth_serializer.is_valid, raise_exception=True)
 
     def test_pairing_serializer(self):
@@ -54,10 +50,8 @@ class TestSerializers(TestCase):
         pairing_serializer = PairingSerializer(data=data)
 
         self.assertTrue(pairing_serializer.is_valid())
-
         self.assertEqual(chrome_address,
                          pairing_serializer.validated_data['temporary_authorization']['signing_address'])
-
         self.assertEqual(device_address, pairing_serializer.validated_data['signing_address'])
 
     def test_pairing_with_date_exceeded(self):
@@ -71,14 +65,14 @@ class TestSerializers(TestCase):
     def test_pairing_with_date_invalid_format(self):
         expiration_date = (timezone.now() + timedelta(days=2)).isoformat()
         data = get_pairing_mock_data(expiration_date=expiration_date)
+
         pairing_serializer = PairingSerializer(data=data)
         self.assertFalse(pairing_serializer.is_valid())
         self.assertTrue('expiration_date' in pairing_serializer.errors['temporary_authorization'])
 
     def test_pairing_with_same_address(self):
         eth_address, eth_key = get_eth_address_with_key()
-
-        expiration_date = isoformat_without_ms((timezone.now() + timedelta(days=2)))
+        expiration_date = isoformat_without_ms(timezone.now() + timedelta(days=2))
 
         data = {
             "temporary_authorization": {
