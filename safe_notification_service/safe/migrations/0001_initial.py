@@ -2,9 +2,11 @@
 
 import django.db.models.deletion
 import django.utils.timezone
-import model_utils.fields
 from django.db import migrations, models
-from django_eth.validators import validate_checksumed_address
+
+import model_utils.fields
+
+from gnosis.eth.django.validators import validate_checksumed_address
 
 import safe_notification_service.safe.models
 

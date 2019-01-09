@@ -6,9 +6,12 @@ from typing import Any, Dict, Tuple
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
-from django_eth.serializers import EthereumAddressField, SignatureSerializer
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from gnosis.eth.django.serializers import (EthereumAddressField,
+                                           SignatureSerializer)
 
 from safe_notification_service.ether.signing import EthereumSignedMessage
 from safe_notification_service.firebase.client import FirebaseProvider

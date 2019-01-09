@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.test import TestCase
+
 from ethereum import utils
 from faker import Faker
 

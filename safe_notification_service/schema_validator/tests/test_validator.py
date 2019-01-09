@@ -1,6 +1,7 @@
 import os
 
 from django.test import TestCase
+
 from jsonschema.exceptions import ValidationError
 
 from safe_notification_service.schema_validator.validator import Validator

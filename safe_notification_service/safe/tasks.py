@@ -1,6 +1,7 @@
+from django.conf import settings
+
 from celery import app
 from celery.utils.log import get_task_logger
-from django.conf import settings
 
 from safe_notification_service.firebase.client import FirebaseProvider
 

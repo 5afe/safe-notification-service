@@ -2,8 +2,9 @@ import json
 from datetime import timedelta
 from typing import Tuple
 
-import factory
 from django.utils import timezone
+
+import factory
 from faker import Faker
 
 from safe_notification_service.ether.signing import EthereumSigner
