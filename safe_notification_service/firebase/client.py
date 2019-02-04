@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from logging import getLogger
 
-from firebase_admin import auth, credentials, initialize_app, messaging
+from firebase_admin import credentials, initialize_app, messaging
 
 from safe_notification_service.utils.singleton import singleton
 
