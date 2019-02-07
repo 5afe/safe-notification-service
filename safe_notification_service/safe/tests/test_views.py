@@ -160,3 +160,11 @@ class TestViews(APITestCase):
         }
         response = self.client.post(reverse('v1:simple-notifications'), data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        with self.settings(NOTIFICATION_SERVICE_PASS='test'):
+            response = self.client.post(reverse('v1:simple-notifications'), data=data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+            data['password'] = 'test'
+            response = self.client.post(reverse('v1:simple-notifications'), data=data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

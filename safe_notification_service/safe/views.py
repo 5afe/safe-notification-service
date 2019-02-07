@@ -136,5 +136,29 @@ class NotificationView(CreateAPIView):
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
 
-class SimpleNotificationView(NotificationView):
+class SimpleNotificationView(CreateAPIView):
     serializer_class = SimpleNotificationSerializer
+
+    @swagger_auto_schema(responses={204: 'Notification was queued',
+                                    400: 'Invalid data',
+                                    403: 'Invalid password',
+                                    404: 'No pairing found'})
+    def post(self, request, *args, **kwargs):
+        """
+        Send notification to device/s. This endpoint is password protected so users cannot abuse of it and send
+        custom notifications to another users
+        """
+        serializer = self.get_serializer_class()(data=request.data)
+        if serializer.is_valid():
+            server_password = settings.NOTIFICATION_SERVICE_PASS
+            if server_password:
+                if serializer.validated_data['password'] != server_password:
+                    return Response(status=status.HTTP_403_FORBIDDEN)
+
+            if serializer.save():
+                # At least one pairing found
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
