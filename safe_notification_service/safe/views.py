@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db.models import Q
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
@@ -13,7 +14,8 @@ from safe_notification_service.version import __version__
 
 from .serializers import (AuthResponseSerializer, AuthSerializer,
                           NotificationSerializer, PairingDeletionSerializer,
-                          PairingResponseSerializer, PairingSerializer)
+                          PairingResponseSerializer, PairingSerializer,
+                          SimpleNotificationSerializer)
 
 
 class AboutView(APIView):
@@ -29,6 +31,7 @@ class AboutView(APIView):
                 'FIREBASE_CREDENTIALS_PATH': settings.FIREBASE_CREDENTIALS_PATH,
                 'NOTIFICATION_MAX_RETRIES': settings.NOTIFICATION_MAX_RETRIES,
                 'NOTIFICATION_RETRY_DELAY_SECONDS': settings.NOTIFICATION_RETRY_DELAY_SECONDS,
+                'NOTIFICATION_SERVICE_PASS': bool(settings.NOTIFICATION_SERVICE_PASS),
             }
         }
         return Response(content)
@@ -125,6 +128,34 @@ class NotificationView(CreateAPIView):
         """
         serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
+            if serializer.save():
+                # At least one pairing found
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
+
+
+class SimpleNotificationView(CreateAPIView):
+    serializer_class = SimpleNotificationSerializer
+
+    @swagger_auto_schema(responses={204: 'Notification was queued',
+                                    400: 'Invalid data',
+                                    403: 'Invalid password',
+                                    404: 'No pairing found'})
+    def post(self, request, *args, **kwargs):
+        """
+        Send notification to device/s. This endpoint is password protected so users cannot abuse of it and send
+        custom notifications to another users
+        """
+        serializer = self.get_serializer_class()(data=request.data)
+        if serializer.is_valid():
+            server_password = settings.NOTIFICATION_SERVICE_PASS
+            if server_password:
+                if serializer.validated_data['password'] != server_password:
+                    return Response(status=status.HTTP_403_FORBIDDEN)
+
             if serializer.save():
                 # At least one pairing found
                 return Response(status=status.HTTP_204_NO_CONTENT)

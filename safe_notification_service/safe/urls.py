@@ -10,5 +10,6 @@ urlpatterns = [
     url(r'^about/$', views.AboutView.as_view(), name='about'),
     url(r'^auth/$', views.AuthCreationView.as_view(), name='auth-creation'),
     url(r'^pairing/$', views.PairingView.as_view(), name='pairing'),
-    url(r'^notifications/$', views.NotificationView.as_view(), name='notifications')
+    url(r'^notifications/$', views.NotificationView.as_view(), name='notifications'),
+    url(r'^simple-notifications/$', views.SimpleNotificationView.as_view(), name='simple-notifications'),
 ]

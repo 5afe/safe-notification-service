@@ -6,9 +6,12 @@ from typing import Any, Dict, Tuple
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
-from django_eth.serializers import EthereumAddressField, SignatureSerializer
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from gnosis.eth.django.serializers import (EthereumAddressField,
+                                           SignatureSerializer)
 
 from safe_notification_service.ether.signing import EthereumSignedMessage
 from safe_notification_service.firebase.client import FirebaseProvider
@@ -200,6 +203,52 @@ class NotificationSerializer(SignedMessageSerializer):
                 logger.warning("Address %s has no push_token", pairing.authorizing_device.owner)
 
         return pairings
+
+    def to_representation(self, instance):
+        return {}
+
+
+class SimpleNotificationSerializer(serializers.Serializer):
+    devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
+    message = serializers.CharField()
+    password = serializers.CharField(default='')
+
+    def validate_message(self, value):
+        try:
+            json.loads(value)
+        except json.JSONDecodeError:
+            raise ValidationError("Message must be a valid stringified JSON")
+        return value
+
+    def validate_devices(self, value):
+        if len(set(value)) != len(value):
+            raise ValidationError("Duplicated addresses are forbidden")
+        return value
+
+    def create(self, validated_data):
+        """
+        Takes care of getting the valid device pairs for the signing user and
+        sends the notifications.
+        """
+        devices = []
+        for owner in validated_data['devices']:
+            try:
+                devices.append(Device.objects.get(owner=owner))
+            except Device.DoesNotExist:
+                pass
+                # raise ValidationError('Owner=%s not found' % owner)
+
+        # convert message to JSON
+        message = json.loads(validated_data['message'])
+
+        for device in devices:
+            # Call celery task for sending notification
+            if device.push_token:
+                send_notification.delay(message, device.push_token)
+            else:
+                logger.warning("Address %s has no push_token", device.owner)
+
+        return devices
 
     def to_representation(self, instance):
         return {}

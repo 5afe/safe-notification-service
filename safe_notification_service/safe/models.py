@@ -1,6 +1,8 @@
 from django.db import models
-from django_eth.models import EthereumAddressField
+
 from model_utils.models import TimeStampedModel
+
+from gnosis.eth.django.models import EthereumAddressField
 
 
 class DeviceManager(models.Manager):
