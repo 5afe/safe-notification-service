@@ -31,6 +31,7 @@ class AboutView(APIView):
                 'FIREBASE_CREDENTIALS_PATH': settings.FIREBASE_CREDENTIALS_PATH,
                 'NOTIFICATION_MAX_RETRIES': settings.NOTIFICATION_MAX_RETRIES,
                 'NOTIFICATION_RETRY_DELAY_SECONDS': settings.NOTIFICATION_RETRY_DELAY_SECONDS,
+                'NOTIFICATION_SERVICE_PASS': bool(settings.NOTIFICATION_SERVICE_PASS),
             }
         }
         return Response(content)
