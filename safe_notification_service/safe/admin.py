@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from .models import Device, DevicePair
+from .models import Device, DevicePair, NotificationType
 
 
+@admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
     fieldsets = (
         ('general_information', {
@@ -13,6 +14,7 @@ class DeviceAdmin(admin.ModelAdmin):
     readonly_fields = ('created', 'modified')
 
 
+@admin.register(DevicePair)
 class DevicePairAdmin(admin.ModelAdmin):
     fieldsets = (
         ('general_information', {
@@ -23,5 +25,6 @@ class DevicePairAdmin(admin.ModelAdmin):
     readonly_fields = ('created', 'modified')
 
 
-admin.site.register(Device, DeviceAdmin)
-admin.site.register(DevicePair, DevicePairAdmin)
+@admin.register(NotificationType)
+class NotificationTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'ios', 'android', 'web')
