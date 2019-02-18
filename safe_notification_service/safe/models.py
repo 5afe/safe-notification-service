@@ -49,3 +49,11 @@ class DevicePair(TimeStampedModel):
 
     def __str__(self):
         return '{} authorizes {}'.format(self.authorizing_device.owner, self.authorized_device.owner)
+
+
+class NotificationType(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
+    ios = models.BooleanField(default=False)
+    android = models.BooleanField(default=True)
+    web = models.BooleanField(default=True)

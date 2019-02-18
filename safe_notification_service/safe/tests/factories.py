@@ -11,7 +11,7 @@ from safe_notification_service.ether.signing import EthereumSigner
 from safe_notification_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..models import Device, DevicePair
+from ..models import Device, DevicePair, NotificationType
 from ..serializers import isoformat_without_ms
 
 faker = Faker()
@@ -31,6 +31,17 @@ class DevicePairFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = DevicePair
+
+
+class NotificationTypeFactory(factory.DjangoModelFactory):
+    name = factory.Faker('name')
+    description = factory.Faker('sentence')
+    ios = False
+    android = True
+    web = True
+
+    class Meta:
+        model = NotificationType
 
 
 def get_signature_json(message, key):

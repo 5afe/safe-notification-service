@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from logging import getLogger
+from typing import Dict
 
 from firebase_admin import credentials, initialize_app, messaging
 
@@ -38,7 +39,7 @@ class MessagingClient(ABC):
         return self._app
 
     @abstractmethod
-    def send_message(self, data, token):
+    def send_message(self, data: Dict[str, any], token: str, ios: bool = True):
         raise NotImplementedError
 
 
@@ -94,10 +95,18 @@ class FirebaseClient(MessagingClient):
         except messaging.ApiCallError:
             return False
 
-    def send_message(self, data, token):
+    def send_message(self, data: Dict[str, any], token: str, ios: bool = True):
+        """
+        Send message using firebase service
+        :param data: Dictionary with the notification data
+        :param token: Firebase token of recipient
+        :param ios: If `True`, `apns` is configured for Apple devices. Otherwise, is not configured and Apple
+        devices will not receive the notification
+        :return:
+        """
         logger.debug("Sending data=%s with token=%s", data, token)
         message = messaging.Message(
-            apns=self.apns,
+            apns=self.apns if ios else None,
             data=data,
             token=token
         )
@@ -118,6 +127,6 @@ class MockedClient(MessagingClient):
     def verify_token(self, token: str) -> bool:
         return True
 
-    def send_message(self, data, token):
+    def send_message(self, data: Dict[str, any], token: str, ios: bool = True):
         logger.warning("MockedClient: Not sending message with data %s and token %s", data, token)
         return 'MockedResponse'
