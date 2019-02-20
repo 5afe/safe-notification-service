@@ -38,7 +38,7 @@ def send_notification(self, message: Dict[str, any], push_token: str) -> None:
     The task sends a Firebase Push Notification
     """
     try:
-        firebase_client.send_message(message, push_token, ios=self.check_ios_enabled(message))
+        firebase_client.send_message(message, push_token, ios=check_ios_enabled(message))
     except Exception as exc:
         str_exc = str(exc)
         if 'Requested entity was not found' in str_exc:
