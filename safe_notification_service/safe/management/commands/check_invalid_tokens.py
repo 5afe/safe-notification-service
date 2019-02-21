@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         delete = options['delete']
         firebase_client = FirebaseProvider()
-        if isinstance(firebase_client, MockedClient):
+        if not firebase_client.app:
             self.stdout.write(self.style.ERROR('Firebase provider not configured!'))
         else:
             for device in Device.objects.all():
