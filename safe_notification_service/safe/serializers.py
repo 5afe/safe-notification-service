@@ -211,7 +211,7 @@ class NotificationSerializer(SignedMessageSerializer):
 class SimpleNotificationSerializer(serializers.Serializer):
     devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
     message = serializers.CharField()
-    password = serializers.CharField(default='')
+    password = serializers.CharField(allow_blank=True, default='')
 
     def validate_message(self, value):
         try:
