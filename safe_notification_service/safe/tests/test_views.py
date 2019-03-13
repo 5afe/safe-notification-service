@@ -93,20 +93,27 @@ class TestViews(APITestCase):
     def test_pairing_deletion(self):
         another_device_address, another_device_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
+        device_2_address, device_2_key = get_eth_address_with_key()
+
         pairing_data = get_pairing_mock_data(another_device_address=another_device_address,
                                              another_device_key=another_device_key, device_key=device_key)
 
-        DeviceFactory(owner=another_device_address)
-        DeviceFactory(owner=device_address)
+        pairing_data_2 = get_pairing_mock_data(another_device_address=device_2_address,
+                                               another_device_key=device_2_key, device_key=device_key)
 
-        response = self.client.post(reverse('v1:pairing'),
-                                    data=json.dumps(pairing_data),
-                                    content_type='application/json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        DeviceFactory(owner=device_address)
+        DeviceFactory(owner=another_device_address)
+        DeviceFactory(owner=device_2_address)
+
+        for pairing in (pairing_data, pairing_data_2):
+            response = self.client.post(reverse('v1:pairing'),
+                                        data=pairing,
+                                        format='json')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         deletion_data = {
-            'device': device_address,
-            'signature': get_signature_json(device_address, device_key)
+            'device': another_device_address,
+            'signature': get_signature_json(another_device_address, device_key)
         }
 
         response = self.client.delete(reverse('v1:pairing'),
@@ -114,11 +121,9 @@ class TestViews(APITestCase):
                                       content_type='application/json')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        with self.assertRaises(DevicePair.DoesNotExist):
-            DevicePair.objects.get(authorizing_device__owner=device_address)
 
-        with self.assertRaises(DevicePair.DoesNotExist):
-            DevicePair.objects.get(authorized_device__owner=device_address)
+        self.assertEqual(DevicePair.objects.filter(authorizing_device__owner=device_address).count(), 1)
+        self.assertEqual(DevicePair.objects.filter(authorized_device__owner=device_address).count(), 1)
 
     def test_notification_creation(self):
         data = get_notification_mock_data()
