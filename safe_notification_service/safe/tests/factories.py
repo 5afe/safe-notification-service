@@ -79,21 +79,21 @@ def get_auth_mock_data(key, token=None):
     }
 
 
-def get_pairing_mock_data(expiration_date=None, chrome_key=None, chrome_address=None, device_key=None):
+def get_pairing_mock_data(expiration_date=None, another_device_key=None, another_device_address=None, device_key=None):
     """ Generates a dictionary data for pairing purposes """
     if not expiration_date:
         expiration_date = isoformat_without_ms((timezone.now() + timedelta(days=2)))
-    if not chrome_address or not chrome_key:
-        chrome_address, chrome_key = get_eth_address_with_key()
+    if not another_device_address or not another_device_key:
+        another_device_address, another_device_key = get_eth_address_with_key()
     if not device_key:
         device_address, device_key = get_eth_address_with_key()
 
     return {
         "temporary_authorization": {
             "expiration_date": expiration_date,
-            "signature": get_signature_json(expiration_date, chrome_key),
+            "signature": get_signature_json(expiration_date, another_device_key),
         },
-        "signature":  get_signature_json(chrome_address, device_key)
+        "signature":  get_signature_json(another_device_address, device_key)
     }
 
 

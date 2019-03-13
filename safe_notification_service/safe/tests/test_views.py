@@ -52,11 +52,12 @@ class TestViews(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_pairing_creation(self):
-        chrome_address, chrome_key = get_eth_address_with_key()
+        another_device_address, another_device_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
-        data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
+        data = get_pairing_mock_data(another_device_address=another_device_address,
+                                     another_device_key=another_device_key, device_key=device_key)
 
-        DeviceFactory(owner=chrome_address)
+        DeviceFactory(owner=another_device_address)
         DeviceFactory(owner=device_address)
 
         # Repeat same request (make sure creation is idempotent)
@@ -66,7 +67,7 @@ class TestViews(APITestCase):
                                         content_type='application/json')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             response_json = response.json()
-            self.assertEqual(set(response_json['devicePair']), set([chrome_address, device_address]))
+            self.assertEqual(set(response_json['devicePair']), {another_device_address, device_address})
             self.assertEqual(DevicePair.objects.count(), 2)
 
     def test_pairing_creation_without_auth(self):
@@ -74,9 +75,10 @@ class TestViews(APITestCase):
         Test pairing with devices that haven't been authenticated before
         """
 
-        chrome_address, chrome_key = get_eth_address_with_key()
+        another_device_address, another_device_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
-        data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
+        data = get_pairing_mock_data(another_device_address=another_device_address,
+                                     another_device_key=another_device_key, device_key=device_key)
 
         response = self.client.post(reverse('v1:pairing'),
                                     data=json.dumps(data),
@@ -85,15 +87,16 @@ class TestViews(APITestCase):
 
         self.assertEqual(DevicePair.objects.count(), 2)
 
-        self.assertIsNone(Device.objects.get(owner=chrome_address).push_token)
+        self.assertIsNone(Device.objects.get(owner=another_device_address).push_token)
         self.assertIsNone(Device.objects.get(owner=device_address).push_token)
 
     def test_pairing_deletion(self):
-        chrome_address, chrome_key = get_eth_address_with_key()
+        another_device_address, another_device_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
-        pairing_data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
+        pairing_data = get_pairing_mock_data(another_device_address=another_device_address,
+                                             another_device_key=another_device_key, device_key=device_key)
 
-        DeviceFactory(owner=chrome_address)
+        DeviceFactory(owner=another_device_address)
         DeviceFactory(owner=device_address)
 
         response = self.client.post(reverse('v1:pairing'),
@@ -125,14 +128,15 @@ class TestViews(APITestCase):
                                    content_type='application/json')
         self.assertEqual(request.status_code, status.HTTP_404_NOT_FOUND)
 
-        chrome_address, _ = get_eth_address_with_key()
+        another_device_address, _ = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
-        d1 = DeviceFactory(owner=chrome_address)
+        d1 = DeviceFactory(owner=another_device_address)
         d2 = DeviceFactory(owner=device_address)
         DevicePairFactory(authorizing_device=d1, authorized_device=d2)
         DevicePairFactory(authorizing_device=d2, authorized_device=d1)
 
-        data = get_notification_mock_data(devices=[chrome_address], eth_address_and_key=(device_address, device_key))
+        data = get_notification_mock_data(devices=[another_device_address],
+                                          eth_address_and_key=(device_address, device_key))
 
         request = self.client.post(reverse('v1:notifications'),
                                    data=json.dumps(data),

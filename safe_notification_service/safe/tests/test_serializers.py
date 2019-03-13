@@ -45,13 +45,13 @@ class TestSerializers(TestCase):
         self.assertRaises(ValidationError, auth_serializer.is_valid, raise_exception=True)
 
     def test_pairing_serializer(self):
-        chrome_address, chrome_key = get_eth_address_with_key()
+        another_device_address, another_device_key = get_eth_address_with_key()
         device_address, device_key = get_eth_address_with_key()
-        data = get_pairing_mock_data(chrome_address=chrome_address, chrome_key=chrome_key, device_key=device_key)
+        data = get_pairing_mock_data(another_device_address=another_device_address, another_device_key=another_device_key, device_key=device_key)
         pairing_serializer = PairingSerializer(data=data)
 
         self.assertTrue(pairing_serializer.is_valid())
-        self.assertEqual(chrome_address,
+        self.assertEqual(another_device_address,
                          pairing_serializer.validated_data['temporary_authorization']['signing_address'])
         self.assertEqual(device_address, pairing_serializer.validated_data['signing_address'])
 
