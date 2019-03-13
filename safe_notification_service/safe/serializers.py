@@ -126,20 +126,20 @@ class PairingSerializer(SignedMessageSerializer):
         return data
 
     def create(self, validated_data):
-        chrome_extension_address = validated_data['temporary_authorization']['signing_address']
+        another_device_address = validated_data['temporary_authorization']['signing_address']
         owner = validated_data['signing_address']
 
-        chrome_device = Device.objects.get_or_create_without_push_token(chrome_extension_address)
+        another_device = Device.objects.get_or_create_without_push_token(another_device_address)
         owner_device = Device.objects.get_or_create_without_push_token(owner)
 
         # Do pairing
         device_pair, _ = DevicePair.objects.update_or_create(
             authorizing_device=owner_device,
-            authorized_device=chrome_device,
+            authorized_device=another_device,
         )
 
         _, _ = DevicePair.objects.update_or_create(
-            authorizing_device=chrome_device,
+            authorizing_device=another_device,
             authorized_device=owner_device,
         )
 
