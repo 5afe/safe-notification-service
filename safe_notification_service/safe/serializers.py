@@ -65,14 +65,17 @@ class AuthSerializer(SignedMessageSerializer):
         return data['push_token'],
 
     def validate_push_token(self, value):
-        try:
-            Device.objects.get(push_token=value)
-            raise ValidationError('Push token %s already in use' % value)
-        except Device.DoesNotExist:
-            if firebase_client.verify_token(value):
-                return value
-            else:
-                raise ValidationError('Push token %s not valid for this project' % value)
+        # Now we would like to have multiple owners with the same `push_token`
+        # That way we can have multiple owners in one Android/iOs device, for example.
+        # Before this fix one owner had to be shared among multiple Safes
+        # try:
+        #     Device.objects.get(push_token=value)
+        #     raise ValidationError('Push token %s already in use' % value)
+        # except Device.DoesNotExist:
+        if firebase_client.verify_token(value):
+            return value
+        else:
+            raise ValidationError('Push token %s not valid for this project' % value)
 
     def create(self, validated_data):
         owner = validated_data['signing_address']
