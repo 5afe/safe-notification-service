@@ -1,5 +1,3 @@
-import json
-
 from django.urls import reverse
 
 from faker import Faker
@@ -23,23 +21,22 @@ class TestViews(APITestCase):
         eth_account, eth_key = get_eth_address_with_key()
         auth_data = get_auth_mock_data(key=eth_key)
 
-        response = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
-                                    content_type='application/json')
+        response = self.client.post(reverse('v1:auth-creation'), data=auth_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, auth_data['push_token'])
         response_json = response.json()
         self.assertEqual(response_json['owner'], eth_account)
         self.assertEqual(response_json['pushToken'], auth_data['push_token'])
 
-        # Try repeating the request with same push token and address
-        response = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
-                                    content_type='application/json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # Try repeating the request with same push token and different address
+        eth_account, eth_key = get_eth_address_with_key()
+        auth_data = get_auth_mock_data(key=eth_key, token=auth_data['push_token'])
+        response = self.client.post(reverse('v1:auth-creation'), data=auth_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Try repeating the request with different push token but same address
         auth_data = get_auth_mock_data(key=eth_key)
-        response = self.client.post(reverse('v1:auth-creation'), data=json.dumps(auth_data),
-                                    content_type='application/json')
+        response = self.client.post(reverse('v1:auth-creation'), data=auth_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Device.objects.get(owner=eth_account).push_token, auth_data['push_token'])
         response_json = response.json()
@@ -47,8 +44,7 @@ class TestViews(APITestCase):
         self.assertEqual(response_json['pushToken'], auth_data['push_token'])
 
     def test_auth_fail(self):
-        response = self.client.post(reverse('v1:auth-creation'), data=json.dumps({}),
-                                    content_type='application/json')
+        response = self.client.post(reverse('v1:auth-creation'), data={}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_pairing_creation(self):
@@ -62,9 +58,7 @@ class TestViews(APITestCase):
 
         # Repeat same request (make sure creation is idempotent)
         for _ in range(0, 2):
-            response = self.client.post(reverse('v1:pairing'),
-                                        data=json.dumps(data),
-                                        content_type='application/json')
+            response = self.client.post(reverse('v1:pairing'), data=data, format='json')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             response_json = response.json()
             self.assertEqual(set(response_json['devicePair']), {another_device_address, device_address})
@@ -80,9 +74,7 @@ class TestViews(APITestCase):
         data = get_pairing_mock_data(another_device_address=another_device_address,
                                      another_device_key=another_device_key, device_key=device_key)
 
-        response = self.client.post(reverse('v1:pairing'),
-                                    data=json.dumps(data),
-                                    content_type='application/json')
+        response = self.client.post(reverse('v1:pairing'), data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         self.assertEqual(DevicePair.objects.count(), 2)
@@ -106,9 +98,7 @@ class TestViews(APITestCase):
         DeviceFactory(owner=device_2_address)
 
         for pairing in (pairing_data, pairing_data_2):
-            response = self.client.post(reverse('v1:pairing'),
-                                        data=pairing,
-                                        format='json')
+            response = self.client.post(reverse('v1:pairing'), data=pairing, format='json')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         deletion_data = {
@@ -116,9 +106,7 @@ class TestViews(APITestCase):
             'signature': get_signature_json(another_device_address, device_key)
         }
 
-        response = self.client.delete(reverse('v1:pairing'),
-                                      data=json.dumps(deletion_data),
-                                      content_type='application/json')
+        response = self.client.delete(reverse('v1:pairing'), data=deletion_data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -128,9 +116,7 @@ class TestViews(APITestCase):
     def test_notification_creation(self):
         data = get_notification_mock_data()
 
-        request = self.client.post(reverse('v1:notifications'),
-                                   data=json.dumps(data),
-                                   content_type='application/json')
+        request = self.client.post(reverse('v1:notifications'), data=data, format='json')
         self.assertEqual(request.status_code, status.HTTP_404_NOT_FOUND)
 
         another_device_address, _ = get_eth_address_with_key()
@@ -143,9 +129,7 @@ class TestViews(APITestCase):
         data = get_notification_mock_data(devices=[another_device_address],
                                           eth_address_and_key=(device_address, device_key))
 
-        request = self.client.post(reverse('v1:notifications'),
-                                   data=json.dumps(data),
-                                   content_type='application/json')
+        request = self.client.post(reverse('v1:notifications'), data=data, format='json')
 
         self.assertEqual(request.status_code, status.HTTP_204_NO_CONTENT)
 
