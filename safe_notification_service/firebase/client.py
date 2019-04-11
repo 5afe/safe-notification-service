@@ -46,14 +46,22 @@ class MessagingClient(ABC):
 @singleton
 class FirebaseClient(MessagingClient):
     # Data for the Apple Push Notification Service
+    # see https://firebase.google.com/docs/reference/admin/python/firebase_admin.messaging
     apns = messaging.APNSConfig(
         headers={'apns-priority': '10'},
         payload=messaging.APNSPayload(
             aps=messaging.Aps(
                 alert=messaging.ApsAlert(
-                    title_loc_key='push.signature_request',
+                    # This is a localized key that iOS will search in 
+                    # the safe iOS app to show as a default title
+                    title_loc_key='sign_transaction_request_title',
                 ),
-                mutable_content=1,
+                # Means the content of the notification will be 
+                # modified by the safe app.
+                # Depending on the 'type' custom field,
+                # 'alert.title' and 'alert.body' above will be
+                # different
+                mutable_content=True,
                 badge=1,
                 sound='default',
             ),
