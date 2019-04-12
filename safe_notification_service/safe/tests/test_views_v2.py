@@ -12,7 +12,7 @@ from rest_framework.test import APITestCase
 from safe_notification_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..models import Device, DevicePair
+from ..models import Device, DevicePair, DeviceTypeEnum
 from .factories import (DeviceFactory, DevicePairFactory, get_auth_mock_data,
                         get_notification_mock_data, get_pairing_mock_data,
                         get_signature_json)
@@ -60,7 +60,12 @@ class TestViewsV2(APITestCase):
         self.assertEqual(response_json[0]['owner'], owner)
         self.assertEqual(response_json[0]['pushToken'], push_token)
 
-        self.assertEqual(Device.objects.get(owner=owner).push_token, push_token)
+        device = Device.objects.get(owner=owner)
+        self.assertEqual(device.push_token, push_token)
+        self.assertEqual(device.build_number, build_number)
+        self.assertEqual(device.version_name, version_name)
+        self.assertEqual(device.client, DeviceTypeEnum.parse_device_type(client).value)
+        self.assertEqual(device.bundle, bundle)
         self.assertEqual(Device.objects.count(), 1)
 
         push_token = 'GGGGGGGGGGGGGGGG-NNNNNNNNNN-OOOOOOOOO-SSSSSSSS-IIIIII-dont-wait-for-it-SSSSSSSSSS'

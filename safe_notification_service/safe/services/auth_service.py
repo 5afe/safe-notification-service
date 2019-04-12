@@ -1,7 +1,9 @@
 from logging import getLogger
 from typing import List
 
-from safe_notification_service.firebase.client import FirebaseProvider, MessagingClient
+from safe_notification_service.firebase.client import (FirebaseProvider,
+                                                       MessagingClient)
+
 from ..models import Device, DeviceTypeEnum
 
 logger = getLogger(__name__)
@@ -48,4 +50,3 @@ class AuthService:
             })
             devices.append(device)
         return devices
-
