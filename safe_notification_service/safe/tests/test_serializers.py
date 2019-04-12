@@ -10,7 +10,8 @@ from safe_notification_service.ether.signing import EthereumSignedMessage
 from safe_notification_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..serializers import (AuthSerializer, GoogleInAppPurchaseSerializer,
+from ..serializers import (AuthSerializer, AuthV2Serializer,
+                           GoogleInAppPurchaseSerializer,
                            NotificationSerializer, PairingDeletionSerializer,
                            PairingSerializer, isoformat_without_ms)
 from .factories import (get_auth_mock_data, get_bad_signature,
@@ -167,3 +168,30 @@ class TestSerializers(TestCase):
             google_in_app_purchase_serializer = GoogleInAppPurchaseSerializer(data=data)
             self.assertFalse(google_in_app_purchase_serializer.is_valid())
             self.assertTrue('signed_data' in google_in_app_purchase_serializer.errors)
+
+    def test_auth_v2_serializer(self):
+        push_token = 'GGGGGGGGGGGGGGGG-NNNNNNNNNN-OOOOOOOOO-SSSSSSSS-IIIIII-wait-for-it-SSSSSSSSSS'
+        build_number = 1644
+        version_name = '1.0.0'
+        client = 'android'
+        bundle = 'pm.gnosis.heimdall'
+
+        data = {
+            'push_token': push_token,
+            'build_number': build_number,
+            'version_name': version_name,
+            'client': client,
+            'bundle': bundle,
+            'signatures': [{'r': 1, 's': 2, 'v': 27}]
+        }
+
+        serializer = AuthV2Serializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+        data['version_name'] = 'a1.0.0'
+        data['client'] = 'Wolverine'
+        serializer = AuthV2Serializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertTrue(serializer.errors['version_name'])
+        self.assertIn('ANDROID', str(serializer.errors['client']))
+        self.assertIn('IOS', str(serializer.errors['client']))
