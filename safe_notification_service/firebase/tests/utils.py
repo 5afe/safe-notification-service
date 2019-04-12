@@ -1,6 +1,5 @@
 import json
 
-import six
 from firebase_admin import _http_client, messaging
 from firebase_admin.credentials import Base
 from google.auth.credentials import Credentials
@@ -61,7 +60,7 @@ class MockAdapter(adapters.HTTPAdapter):
         resp = models.Response()
         resp.url = request.url
         resp.status_code = self._status
-        resp.raw = six.BytesIO(self._data.encode())
+        resp.raw = self._data.encode()
         return resp
 
 

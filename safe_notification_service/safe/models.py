@@ -1,8 +1,29 @@
+from enum import Enum
+
 from django.db import models
 
 from model_utils.models import TimeStampedModel
 
 from gnosis.eth.django.models import EthereumAddressField
+
+
+class DeviceTypeEnum(Enum):
+    ANDROID = 0
+    IOS = 1
+    EXTENSION = 2
+
+    @staticmethod
+    def parse_device_type(device_type: str):
+        if not device_type:
+            return None
+        elif device_type.lower() == 'android':
+            return DeviceTypeEnum.ANDROID
+        elif device_type.lower() == 'ios':
+            return DeviceTypeEnum.IOS
+        elif device_type.lower() == 'extension':
+            return DeviceTypeEnum.EXTENSION
+        else:
+            return None
 
 
 class DeviceManager(models.Manager):
@@ -15,11 +36,13 @@ class DeviceManager(models.Manager):
 
 class Device(TimeStampedModel):
     objects = DeviceManager()
-    push_token = models.TextField(
-        null=True,
-        blank=True,
-    )
     owner = EthereumAddressField(primary_key=True)
+    push_token = models.TextField(null=True, blank=True)
+    build_number = models.PositiveIntegerField(default=0)  # e.g. 1644
+    version_name = models.CharField(max_length=20, default='')  # e.g 1.0.0
+    client = models.PositiveSmallIntegerField(null=True, default=None,
+                                              choices=[(tag.value, tag.name) for tag in DeviceTypeEnum])
+    bundle = models.CharField(max_length=100, default='')
 
     class Meta:
         verbose_name = 'Device'
@@ -28,6 +51,12 @@ class Device(TimeStampedModel):
     def __str__(self):
         token = self.push_token[:10] if self.push_token else 'No Token'
         return '{} - {}...'.format(self.owner, token)
+
+    def get_device_type(self):
+        if self.device_type is None:
+            return None
+        else:
+            return DeviceTypeEnum(self.get_device_type())
 
 
 class DevicePair(TimeStampedModel):

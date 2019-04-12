@@ -1,5 +1,6 @@
 import json
 import logging
+from abc import abstractmethod
 from datetime import datetime
 from typing import Any, Dict, Tuple
 
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
+from packaging.version import InvalidVersion, Version
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -15,7 +17,8 @@ from gnosis.eth.django.serializers import (EthereumAddressField,
 
 from safe_notification_service.ether.signing import EthereumSignedMessage
 from safe_notification_service.firebase.client import FirebaseProvider
-from safe_notification_service.safe.models import Device, DevicePair
+from safe_notification_service.safe.models import (Device, DevicePair,
+                                                   DeviceTypeEnum)
 from safe_notification_service.safe.tasks import send_notification
 
 from .helpers import validate_google_billing_purchase
@@ -58,6 +61,38 @@ class SignedMessageSerializer(serializers.Serializer):
         return ()
 
 
+class MultipleSignedMessageSerializer(serializers.Serializer):
+    """
+    Inherit from this class and define get_hashed_fields function
+    Take care not to define `message`, `message_hash` or `signing_address` fields
+    """
+    signatures = SignatureSerializer(many=True)
+
+    def validate(self, data):
+        super().validate(data)
+        message = ''.join(self.get_hashed_fields(data))
+        data['message'] = message
+        signing_addresses = []
+        for signature in data['signatures']:
+            v = signature['v']
+            r = signature['r']
+            s = signature['s']
+            ethereum_signed_message = EthereumSignedMessage(message, v, r, s)
+            data['message_hash'] = ethereum_signed_message.message_hash
+            signing_addresses.append(ethereum_signed_message.get_signing_address())
+
+        data['signing_addresses'] = signing_addresses
+        return data
+
+    @abstractmethod
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        """
+        :return: fields to concatenate for hash calculation
+        :rtype: Tuple[str]
+        """
+        pass
+
+
 class AuthSerializer(SignedMessageSerializer):
     push_token = serializers.CharField(min_length=1)
 
@@ -90,6 +125,29 @@ class AuthSerializer(SignedMessageSerializer):
                 push_token=push_token
             )
         return device
+
+
+class AuthV2Serializer(MultipleSignedMessageSerializer):
+    push_token = serializers.CharField(min_length=1)
+    build_number = serializers.IntegerField(min_value=0)  # e.g. 1644
+    version_name = serializers.CharField(min_length=1, max_length=20)  # e.g. 1.0.0
+    client = serializers.CharField(min_length=1, max_length=30)  # e.g. Android, iOs and Extension
+    bundle = serializers.CharField(min_length=1, max_length=100)
+
+    def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
+        return data['push_token'], str(data['build_number']), data['version_name'], data['client'], data['bundle']
+
+    def validate_version_name(self, value):
+        try:
+            Version(value)
+        except InvalidVersion as exc:
+            raise ValidationError(str(exc))
+        return value
+
+    def validate_client(self, client):
+        if DeviceTypeEnum.parse_device_type(client) is None:
+            raise ValidationError('Client must be one of %s' % [d.name for d in DeviceTypeEnum])
+        return client
 
 
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
@@ -294,6 +352,20 @@ class GoogleInAppPurchaseSerializer(serializers.Serializer):
 class AuthResponseSerializer(serializers.Serializer):
     owner = EthereumAddressField()
     push_token = serializers.CharField()
+
+
+class AuthV2ResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Device
+        exclude = ()
+
+    client = serializers.SerializerMethodField()
+
+    def get_client(self, obj) -> str:
+        if obj.client is None:
+            return None
+        else:
+            return DeviceTypeEnum(obj.client).name
 
 
 class PairingResponseSerializer(serializers.Serializer):
