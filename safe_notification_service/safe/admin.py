@@ -7,7 +7,10 @@ from .models import Device, DevicePair, NotificationType
 class DeviceAdmin(admin.ModelAdmin):
     fieldsets = (
         ('general_information', {
-           'fields': ('push_token', 'owner', 'client', 'version_name', 'build_number', 'bundle', '')
+           'fields': ('push_token', 'owner')
+        }),
+        ('application_information', {
+            'fields': ('client', 'version_name', 'build_number', 'bundle')
         }),
     )
     list_display = ('created', 'push_token', 'owner', 'client', 'version_name')
