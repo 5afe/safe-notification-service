@@ -42,7 +42,7 @@ class TestViewsV2(APITestCase):
         owner = account.address
         push_token = 'GGGGGGGGGGGGGGGG-NNNNNNNNNN-OOOOOOOOO-SSSSSSSS-IIIIII-wait-for-it-SSSSSSSSSS'
         build_number = 1644
-        version_name = '1.0.0'
+        version_name = '1.0.0-beta'
         client = 'android'
         bundle = 'pm.gnosis.heimdall'
         data = {

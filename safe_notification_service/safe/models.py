@@ -39,7 +39,7 @@ class Device(TimeStampedModel):
     owner = EthereumAddressField(primary_key=True)
     push_token = models.TextField(null=True, blank=True)
     build_number = models.PositiveIntegerField(default=0)  # e.g. 1644
-    version_name = models.CharField(max_length=20, default='')  # e.g 1.0.0
+    version_name = models.CharField(max_length=100, default='')  # e.g 1.0.0
     client = models.PositiveSmallIntegerField(null=True, default=None,
                                               choices=[(tag.value, tag.name) for tag in DeviceTypeEnum])
     bundle = models.CharField(max_length=100, default='')
