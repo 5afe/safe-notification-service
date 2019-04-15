@@ -172,7 +172,7 @@ class TestSerializers(TestCase):
     def test_auth_v2_serializer(self):
         push_token = 'GGGGGGGGGGGGGGGG-NNNNNNNNNN-OOOOOOOOO-SSSSSSSS-IIIIII-wait-for-it-SSSSSSSSSS'
         build_number = 1644
-        version_name = '1.0.0'
+        version_name = '1.0.0-beta'
         client = 'android'
         bundle = 'pm.gnosis.heimdall'
 
@@ -192,6 +192,5 @@ class TestSerializers(TestCase):
         data['client'] = 'Wolverine'
         serializer = AuthV2Serializer(data=data)
         self.assertFalse(serializer.is_valid())
-        self.assertTrue(serializer.errors['version_name'])
         self.assertIn('ANDROID', str(serializer.errors['client']))
         self.assertIn('IOS', str(serializer.errors['client']))

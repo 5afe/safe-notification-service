@@ -8,7 +8,6 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
-from packaging.version import InvalidVersion, Version
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -130,19 +129,12 @@ class AuthSerializer(SignedMessageSerializer):
 class AuthV2Serializer(MultipleSignedMessageSerializer):
     push_token = serializers.CharField(min_length=1)
     build_number = serializers.IntegerField(min_value=0)  # e.g. 1644
-    version_name = serializers.CharField(min_length=1, max_length=20)  # e.g. 1.0.0
+    version_name = serializers.CharField(min_length=1, max_length=100)  # e.g. 1.0.0-beta
     client = serializers.CharField(min_length=1, max_length=30)  # e.g. Android, iOs and Extension
     bundle = serializers.CharField(min_length=1, max_length=100)
 
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['push_token'], str(data['build_number']), data['version_name'], data['client'], data['bundle']
-
-    def validate_version_name(self, value):
-        try:
-            Version(value)
-        except InvalidVersion as exc:
-            raise ValidationError(str(exc))
-        return value
 
     def validate_client(self, client):
         if DeviceTypeEnum.parse_device_type(client) is None:
