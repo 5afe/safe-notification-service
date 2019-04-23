@@ -45,7 +45,7 @@ class AuthService:
                 'push_token': push_token,
                 'build_number': build_number,
                 'version_name': version_name,
-                'client': DeviceTypeEnum.parse_device_type(client).value,
+                'client': DeviceTypeEnum[client.upper()].value,
                 'bundle': bundle,
             })
             devices.append(device)
