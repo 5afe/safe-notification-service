@@ -137,8 +137,13 @@ class AuthV2Serializer(MultipleSignedMessageSerializer):
         return data['push_token'], str(data['build_number']), data['version_name'], data['client'], data['bundle']
 
     def validate_client(self, client):
-        if DeviceTypeEnum.parse_device_type(client) is None:
-            raise ValidationError('Client must be one of %s' % [d.name for d in DeviceTypeEnum])
+        try:
+            DeviceTypeEnum[client.upper()]
+            if client != client.lower():
+                raise KeyError
+        except KeyError:
+            raise ValidationError('Client must be one of %s' % [d.name.lower() for d in DeviceTypeEnum])
+
         return client
 
 
@@ -357,7 +362,7 @@ class AuthV2ResponseSerializer(serializers.ModelSerializer):
         if obj.client is None:
             return None
         else:
-            return DeviceTypeEnum(obj.client).name
+            return DeviceTypeEnum(obj.client).name.lower()
 
 
 class PairingResponseSerializer(serializers.Serializer):

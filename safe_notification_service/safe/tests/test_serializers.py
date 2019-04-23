@@ -188,9 +188,14 @@ class TestSerializers(TestCase):
         serializer = AuthV2Serializer(data=data)
         self.assertTrue(serializer.is_valid())
 
+        data['client'] = 'ANDROID'
+        serializer = AuthV2Serializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('android', str(serializer.errors['client']))
+
         data['version_name'] = 'a1.0.0'
         data['client'] = 'Wolverine'
         serializer = AuthV2Serializer(data=data)
         self.assertFalse(serializer.is_valid())
-        self.assertIn('ANDROID', str(serializer.errors['client']))
-        self.assertIn('IOS', str(serializer.errors['client']))
+        self.assertIn('android', str(serializer.errors['client']))
+        self.assertIn('ios', str(serializer.errors['client']))

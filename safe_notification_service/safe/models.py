@@ -12,19 +12,6 @@ class DeviceTypeEnum(Enum):
     IOS = 1
     EXTENSION = 2
 
-    @staticmethod
-    def parse_device_type(device_type: str):
-        if not device_type:
-            return None
-        elif device_type.lower() == 'android':
-            return DeviceTypeEnum.ANDROID
-        elif device_type.lower() == 'ios':
-            return DeviceTypeEnum.IOS
-        elif device_type.lower() == 'extension':
-            return DeviceTypeEnum.EXTENSION
-        else:
-            return None
-
 
 class DeviceManager(models.Manager):
     def get_or_create_without_push_token(self, owner):

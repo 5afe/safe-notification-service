@@ -64,7 +64,7 @@ class TestViewsV2(APITestCase):
         self.assertEqual(device.push_token, push_token)
         self.assertEqual(device.build_number, build_number)
         self.assertEqual(device.version_name, version_name)
-        self.assertEqual(device.client, DeviceTypeEnum.parse_device_type(client).value)
+        self.assertEqual(device.client, DeviceTypeEnum[client.upper()].value)
         self.assertEqual(device.bundle, bundle)
         self.assertEqual(Device.objects.count(), 1)
 
@@ -84,5 +84,5 @@ class TestViewsV2(APITestCase):
         for result in response_json:
             self.assertEqual(result['pushToken'], push_token)
             self.assertEqual(result['buildNumber'], build_number)
-            self.assertEqual(result['client'], client.upper())
+            self.assertEqual(result['client'], client.lower())
             self.assertEqual(result['bundle'], bundle)
