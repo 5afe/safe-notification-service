@@ -33,10 +33,18 @@ class AuthService:
     def __init__(self, messaging_client: MessagingClient):
         self.messaging_client = messaging_client
 
+    def verify_push_token(self, push_token: str):
+        """
+        Checks if push token is valid
+        :param push_token: Firebase push token
+        :return: `True` if valid, `False` otherwise
+        """
+        return self.messaging_client.verify_token(push_token)
+
     def create_auth(self, push_token: str, build_number: int, version_name: str, client: int, bundle: str,
                     owners: List[str]) -> List[Device]:
 
-        if not self.messaging_client.verify_token(push_token):
+        if not self.verify_push_token(push_token):
             raise InvalidPushToken(push_token)
 
         devices = []
