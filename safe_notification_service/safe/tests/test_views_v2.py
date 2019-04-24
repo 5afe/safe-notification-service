@@ -5,19 +5,13 @@ from django.urls import reverse
 
 from eth_account import Account
 from ethereum.utils import sha3
-from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from safe_notification_service.ether.tests.factories import \
-    get_eth_address_with_key
+from safe_notification_service.safe.services.auth_service import (
+    AuthService, AuthServiceProvider)
 
-from ..models import Device, DevicePair, DeviceTypeEnum
-from .factories import (DeviceFactory, DevicePairFactory, get_auth_mock_data,
-                        get_notification_mock_data, get_pairing_mock_data,
-                        get_signature_json)
-
-faker = Faker()
+from ..models import Device, DeviceTypeEnum
 
 
 class TestViewsV2(APITestCase):
@@ -86,3 +80,26 @@ class TestViewsV2(APITestCase):
             self.assertEqual(result['buildNumber'], build_number)
             self.assertEqual(result['client'], client.lower())
             self.assertEqual(result['bundle'], bundle)
+
+    def test_auth_creation_v2_invalid_push_token(self):
+        url = reverse('v2:auth-creation')
+        account = Account.create()
+        data = {
+            'push_token': 'GGGGGGGGGGGGGGGG-NNNNNNNNNN-OOOOOOOOO-SSSSSSSS-IIIIII-wait-for-it-SSSSSSSSSS',
+            'build_number': 1644,
+            'version_name': '1.0.0-beta',
+            'client': 'android',
+            'bundle': 'pm.gnosis.heimdall',
+        }
+
+        data['signatures'] = self._sign_auth(data, [account])
+
+        # Mock auth_service
+        def return_false(self, token: str):
+            return False
+        auth_service = AuthServiceProvider()
+        auth_service.verify_push_token = return_false.__get__(auth_service, AuthService)
+        response = self.client.post(url, data=data, format='json')
+        AuthServiceProvider.del_singleton()
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.assertEqual(response.json()['exception'], 'InvalidPushToken: %s' % data['push_token'])
