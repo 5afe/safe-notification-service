@@ -48,13 +48,17 @@ class AuthService:
             raise InvalidPushToken(push_token)
 
         devices = []
+        client = client.upper()
         for owner in owners:
             device, _ = Device.objects.update_or_create(owner=owner, defaults={
                 'push_token': push_token,
                 'build_number': build_number,
                 'version_name': version_name,
-                'client': DeviceTypeEnum[client.upper()].value,
+                'client': DeviceTypeEnum[client].value,
                 'bundle': bundle,
             })
             devices.append(device)
+            logger.info('Owner=%s registered device with client=%s, bundle=%s, version_name=%s,'
+                        'build_number=%d and push_token=%s',
+                        owner, client, bundle, version_name, build_number, push_token)
         return devices
