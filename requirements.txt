@@ -1,4 +1,4 @@
-Django==2.2
+Django==2.2.1
 celery==4.3.0
 cryptography==2.3
 django-authtools==1.6.0
@@ -7,12 +7,12 @@ django-environ==0.4.5
 django-filter==2.1.0
 django-model-utils==3.1.2
 djangorestframework-camel-case==1.0.3
-djangorestframework==3.9.2
+djangorestframework==3.9.3
 docutils==0.14
 drf-yasg[validation]==1.15.0
 ethereum==2.3.2
 factory-boy==2.11.1
-faker==1.0.4
+faker==1.0.5
 firebase-admin==2.16.0
 gevent==1.4.0
 gnosis-py==1.1.3

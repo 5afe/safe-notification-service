@@ -84,6 +84,7 @@ class AuthCreationView(CreateAPIView):
                 'push_token': device.push_token
             })
             assert response_serializer.is_valid()
+            logger.info('Owner=%s registered device with push_token=%s', device.owner, device.push_token)
             return Response(status=status.HTTP_201_CREATED, data=response_serializer.data)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
