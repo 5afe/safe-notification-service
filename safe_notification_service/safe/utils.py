@@ -1,4 +1,5 @@
 import logging
+
 from gunicorn import glogging
 
 
@@ -15,4 +16,3 @@ class CustomGunicornLogger(glogging.Logger):
         # Add filters to Gunicorn logger
         logger = logging.getLogger("gunicorn.access")
         logger.addFilter(IgnoreCheckUrl())
-

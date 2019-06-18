@@ -4,14 +4,15 @@ from typing import Tuple
 
 from django.utils import timezone
 
-import factory
+import factory.fuzzy
+from eth_account import Account
 from faker import Faker
 
 from safe_notification_service.ether.signing import EthereumSigner
 from safe_notification_service.ether.tests.factories import \
     get_eth_address_with_key
 
-from ..models import Device, DevicePair, NotificationType
+from ..models import Device, DevicePair, DeviceTypeEnum, NotificationType
 from ..serializers import isoformat_without_ms
 
 faker = Faker()
@@ -19,7 +20,12 @@ faker = Faker()
 
 class DeviceFactory(factory.DjangoModelFactory):
     push_token = factory.Faker('sha256', raw_output=False)
-    owner = factory.LazyFunction(lambda: get_eth_address_with_key()[0])
+    owner = factory.LazyFunction(lambda: Account.create().address)
+    push_token = factory.fuzzy.FuzzyText(length=20)
+    build_number = factory.fuzzy.FuzzyInteger(0, 2000)
+    version_name = factory.Sequence(lambda x: f'1.0.{x}')
+    client = DeviceTypeEnum.ANDROID.value
+    bundle = factory.Faker('linux_platform_token')
 
     class Meta:
         model = Device

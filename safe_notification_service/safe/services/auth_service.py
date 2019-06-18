@@ -41,8 +41,10 @@ class AuthService:
         """
         return self.messaging_client.verify_token(push_token)
 
-    def create_auth(self, push_token: str, build_number: int, version_name: str, client: int, bundle: str,
+    def create_auth(self, push_token: str, build_number: int, version_name: str, client: str, bundle: str,
                     owners: List[str]) -> List[Device]:
+
+        assert owners, 'At least one owner must be provided'
 
         if not self.verify_push_token(push_token):
             raise InvalidPushToken(push_token)
@@ -61,4 +63,7 @@ class AuthService:
             logger.info('Owner=%s registered device with client=%s, bundle=%s, version_name=%s,'
                         'build_number=%d and push_token=%s',
                         owner, client, bundle, version_name, build_number, push_token)
+
+        # Delete existing owners linked to this push token
+        Device.objects.exclude(owner__in=owners).filter(push_token=push_token).delete()
         return devices
