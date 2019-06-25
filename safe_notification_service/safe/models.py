@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 from django.db import models
 
@@ -72,4 +73,15 @@ class NotificationType(models.Model):
     description = models.TextField(blank=True)
     ios = models.BooleanField(default=False)
     android = models.BooleanField(default=True)
-    web = models.BooleanField(default=True)
+    extension = models.BooleanField(default=True)
+
+    @property
+    def enabled_device_types(self) -> List[DeviceTypeEnum]:
+        device_types = []
+        if self.ios:
+            device_types.append(DeviceTypeEnum.IOS)
+        if self.android:
+            device_types.append(DeviceTypeEnum.ANDROID)
+        if self.extension:
+            device_types.append(DeviceTypeEnum.EXTENSION)
+        return device_types

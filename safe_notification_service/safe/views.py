@@ -1,3 +1,4 @@
+import json
 from logging import getLogger
 
 from django.conf import settings
@@ -18,6 +19,7 @@ from .serializers import (AuthResponseSerializer, AuthSerializer,
                           PairingResponseSerializer, PairingSerializer,
                           SimpleNotificationSerializer)
 from .services.auth_service import AuthServiceException
+from .tasks import send_notification_to_devices
 
 logger = getLogger(__name__)
 
@@ -157,7 +159,12 @@ class NotificationView(CreateAPIView):
         """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            if serializer.save():
+            validated_data = serializer.validated_data
+            # Parse message to JSON
+            message = json.loads(validated_data['message'])
+            devices = validated_data['devices']
+            signer_address = validated_data['signing_address']
+            if send_notification_to_devices(message, devices, signer_address):
                 # At least one pairing found
                 return Response(status=status.HTTP_204_NO_CONTENT)
             else:
@@ -185,7 +192,10 @@ class SimpleNotificationView(CreateAPIView):
                 if serializer.validated_data['password'] != server_password:
                     return Response(status=status.HTTP_403_FORBIDDEN)
 
-            if serializer.save():
+            validated_data = serializer.validated_data
+            message = json.loads(validated_data['message'])
+            devices = validated_data['devices']
+            if send_notification_to_devices(message, devices):
                 # At least one pairing found
                 return Response(status=status.HTTP_204_NO_CONTENT)
             else:

@@ -44,7 +44,7 @@ class NotificationTypeFactory(factory.DjangoModelFactory):
     description = factory.Faker('sentence')
     ios = False
     android = True
-    web = True
+    extension = True
 
     class Meta:
         model = NotificationType
