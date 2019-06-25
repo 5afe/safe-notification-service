@@ -59,7 +59,7 @@ class NotificationService:
             try:
                 notification_type = NotificationType.objects.get(name=message_type)
                 return [device for device in devices
-                        if DeviceTypeEnum(device.client) in notification_type.enabled_device_types]
+                        if notification_type.matches_device(device)]
             except NotificationType.DoesNotExist:
                 return devices
 

@@ -1,8 +1,9 @@
 from django.test import TestCase
 
-from .factories import DeviceFactory, DevicePairFactory, NotificationTypeFactory
-from ..models import Device, DeviceTypeEnum
+from ..models import DeviceTypeEnum
 from ..services import NotificationServiceProvider
+from .factories import (DeviceFactory, DevicePairFactory,
+                        NotificationTypeFactory)
 
 
 class TestNotificationService(TestCase):
@@ -39,39 +40,60 @@ class TestNotificationService(TestCase):
 
         for signer_address in (None, signer_device.owner):
             self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
-                                                                                 signer_address=signer_address),
-                                        devices)
+                                                                           signer_address=signer_address),
+                                  devices)
 
         notification_type = NotificationTypeFactory(
             name=message['type'],
-            ios=False,
-            android=True,
-            extension=False
+            ios=None,
+            android=0,
+            extension=None
         )
         for signer_address in (None, signer_device.owner):
             self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
-                                                                                 signer_address=signer_address),
-                                        [device_android])
+                                                                           signer_address=signer_address),
+                                  [device_android])
 
-        notification_type.ios = True
+        notification_type.ios = 0
         notification_type.save()
         for signer_address in (None, signer_device.owner):
             self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
-                                                                                 signer_address=signer_address),
-                                        [device_android, device_ios])
+                                                                           signer_address=signer_address),
+                                  [device_android, device_ios])
 
-        notification_type.extension = True
+        notification_type.extension = 0
         notification_type.save()
         for signer_address in (None, signer_device.owner):
             self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
-                                                                                 signer_address=signer_address),
-                                        devices)
+                                                                           signer_address=signer_address),
+                                  devices)
 
-        notification_type.android = False
-        notification_type.extension = False
-        notification_type.ios = False
+        notification_type.android = None
+        notification_type.extension = None
+        notification_type.ios = None
         notification_type.save()
         for signer_address in (None, signer_device.owner):
             self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
-                                                                                 signer_address=signer_address),
-                                        [])
+                                                                           signer_address=signer_address),
+                                  [])
+
+        notification_type.android = device_android.build_number - 1
+        notification_type.save()
+        for signer_address in (None, signer_device.owner):
+            self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
+                                                                           signer_address=signer_address),
+                                  [device_android])
+
+        notification_type.android = device_android.build_number
+        notification_type.save()
+        for signer_address in (None, signer_device.owner):
+            self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
+                                                                           signer_address=signer_address),
+                                  [device_android])
+
+        notification_type.android = device_android.build_number + 1
+        notification_type.save()
+        for signer_address in (None, signer_device.owner):
+            self.assertCountEqual(notification_service.get_enabled_devices(message, device_owners,
+                                                                           signer_address=signer_address),
+                                  [])

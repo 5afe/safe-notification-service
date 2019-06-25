@@ -39,30 +39,30 @@ class TestTasks(APITestCase):
 
         notification_type = NotificationTypeFactory(
             name=message['type'],
-            ios=False,
-            android=True,
-            extension=False
+            ios=None,
+            android=0,
+            extension=None
         )
 
         self.assertCountEqual(send_notification_to_devices(message, device_owners,
                                                            signer_device.owner),
                               [device_android])
 
-        notification_type.ios = True
+        notification_type.ios = 0
         notification_type.save()
         self.assertCountEqual(send_notification_to_devices(message, device_owners,
                                                            signer_device.owner),
                               [device_android, device_ios])
 
-        notification_type.extension = True
+        notification_type.extension = 0
         notification_type.save()
         self.assertCountEqual(send_notification_to_devices(message, device_owners,
                                                            signer_device.owner),
                               devices)
 
-        notification_type.android = False
-        notification_type.extension = False
-        notification_type.ios = False
+        notification_type.android = None
+        notification_type.extension = None
+        notification_type.ios = None
         notification_type.save()
         self.assertCountEqual(send_notification_to_devices(message, device_owners,
                                                            signer_device.owner),

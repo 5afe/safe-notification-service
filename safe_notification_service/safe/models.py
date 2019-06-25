@@ -41,10 +41,10 @@ class Device(TimeStampedModel):
         return '{} - {}...'.format(self.owner, token)
 
     def get_device_type(self):
-        if self.device_type is None:
+        if self.client is None:
             return None
         else:
-            return DeviceTypeEnum(self.get_device_type())
+            return DeviceTypeEnum(self.client)
 
 
 class DevicePair(TimeStampedModel):
@@ -71,17 +71,19 @@ class DevicePair(TimeStampedModel):
 class NotificationType(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
-    ios = models.BooleanField(default=False)
-    android = models.BooleanField(default=True)
-    extension = models.BooleanField(default=True)
+    # For next attributes, when `None` device type is disabled, else `build_number` of `Device` must be >=
+    ios = models.PositiveIntegerField(default=None, null=True)
+    android = models.PositiveIntegerField(default=None, null=True)
+    extension = models.PositiveIntegerField(default=None, null=True)
 
-    @property
-    def enabled_device_types(self) -> List[DeviceTypeEnum]:
-        device_types = []
-        if self.ios:
-            device_types.append(DeviceTypeEnum.IOS)
-        if self.android:
-            device_types.append(DeviceTypeEnum.ANDROID)
-        if self.extension:
-            device_types.append(DeviceTypeEnum.EXTENSION)
-        return device_types
+    def matches_device(self, device: Device) -> bool:
+        device_type = device.get_device_type()
+        if device_type == DeviceTypeEnum.ANDROID:
+            build_number = self.android
+        elif device_type == DeviceTypeEnum.EXTENSION:
+            build_number = self.extension
+        elif device_type == DeviceTypeEnum.IOS:
+            build_number = self.ios
+        else:
+            return False
+        return (build_number is not None) and (device.build_number >= build_number)

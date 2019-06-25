@@ -42,9 +42,9 @@ class DevicePairFactory(factory.DjangoModelFactory):
 class NotificationTypeFactory(factory.DjangoModelFactory):
     name = factory.Faker('name')
     description = factory.Faker('sentence')
-    ios = False
-    android = True
-    extension = True
+    ios = None
+    android = None
+    extension = None
 
     class Meta:
         model = NotificationType
