@@ -24,3 +24,4 @@ class DevicePairAdmin(admin.ModelAdmin):
 class NotificationTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'ios', 'android', 'web')
     list_filter = ('name', 'ios', 'android', 'web')
+    search_fields = ['name', 'description']

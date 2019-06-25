@@ -244,7 +244,7 @@ class NotificationSerializer(SignedMessageSerializer):
         """
         signer_address = validated_data['signing_address']
         devices = validated_data['devices']
-        # convert message to JSON
+        # Parse message to JSON
         message = json.loads(validated_data['message'])
 
         pairings = DevicePair.objects.filter(

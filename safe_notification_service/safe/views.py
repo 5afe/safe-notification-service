@@ -76,7 +76,7 @@ class AuthCreationView(CreateAPIView):
         Links a `push_token` to a `owner`. If this endpoint is called again with the same `owner`,
         it will be updated with the new `push_token`
         """
-        serializer = self.get_serializer_class()(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             device = serializer.save()
             response_serializer = AuthResponseSerializer(data={
@@ -111,7 +111,7 @@ class PairingView(CreateAPIView):
         """
         Pairs 2 devices
         """
-        serializer = self.get_serializer_class()(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
             response_serializer = PairingResponseSerializer(data={
@@ -129,7 +129,7 @@ class PairingView(CreateAPIView):
         """
         Delete pairing between 2 devices
         """
-        serializer = self.get_serializer_class()(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             signer_address = serializer.validated_data['signing_address']
             device_address = serializer.validated_data['device']
@@ -155,7 +155,7 @@ class NotificationView(CreateAPIView):
         """
         Send notification to device/s
         """
-        serializer = self.get_serializer_class()(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             if serializer.save():
                 # At least one pairing found
@@ -178,7 +178,7 @@ class SimpleNotificationView(CreateAPIView):
         Send notification to device/s. This endpoint is password protected so users cannot abuse of it and send
         custom notifications to another users
         """
-        serializer = self.get_serializer_class()(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             server_password = settings.NOTIFICATION_SERVICE_PASS
             if server_password:
