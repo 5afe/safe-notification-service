@@ -8,7 +8,6 @@ from .factories import (DeviceFactory, DevicePairFactory,
 
 
 class TestTasks(APITestCase):
-
     def test_send_notification_to_devices(self):
         message_type = 'safeCreation'
         message = {
@@ -23,9 +22,9 @@ class TestTasks(APITestCase):
         device_owners = [device.owner for device in devices]
         signer_device = DeviceFactory()
 
-        self.assertEqual(send_notification_to_devices(message, device_owners,
-                                                      signer_device.owner),
-                         [])
+        self.assertCountEqual(send_notification_to_devices(message, device_owners,
+                                                           signer_device.owner),
+                              [])
 
         # Devices must be paired to the signer device
         for device in devices:
@@ -34,9 +33,9 @@ class TestTasks(APITestCase):
                 authorized_device=signer_device
             )
 
-        self.assertEqual(set(send_notification_to_devices(message, device_owners,
-                                                          signer_device.owner)),
-                         set(devices))
+        self.assertCountEqual(send_notification_to_devices(message, device_owners,
+                                                           signer_device.owner),
+                              devices)
 
         notification_type = NotificationTypeFactory(
             name=message['type'],
@@ -45,29 +44,29 @@ class TestTasks(APITestCase):
             extension=False
         )
 
-        self.assertListEqual(send_notification_to_devices(message, device_owners,
-                                                          signer_device.owner),
-                             [device_android])
+        self.assertCountEqual(send_notification_to_devices(message, device_owners,
+                                                           signer_device.owner),
+                              [device_android])
 
         notification_type.ios = True
         notification_type.save()
-        self.assertEqual(set(send_notification_to_devices(message, device_owners,
-                                                          signer_device.owner)),
-                         set([device_android, device_ios]))
+        self.assertCountEqual(send_notification_to_devices(message, device_owners,
+                                                           signer_device.owner),
+                              [device_android, device_ios])
 
         notification_type.extension = True
         notification_type.save()
-        self.assertEqual(set(send_notification_to_devices(message, device_owners,
-                                                          signer_device.owner)),
-                         set(devices))
+        self.assertCountEqual(send_notification_to_devices(message, device_owners,
+                                                           signer_device.owner),
+                              devices)
 
         notification_type.android = False
         notification_type.extension = False
         notification_type.ios = False
         notification_type.save()
-        self.assertListEqual(send_notification_to_devices(message, device_owners,
-                                                          signer_device.owner),
-                             [])
+        self.assertCountEqual(send_notification_to_devices(message, device_owners,
+                                                           signer_device.owner),
+                              [])
 
     def test_send_notification_task(self):
         message_type = 'safeCreation'
