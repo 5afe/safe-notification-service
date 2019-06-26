@@ -19,6 +19,7 @@ from .serializers import (AuthResponseSerializer, AuthSerializer,
                           PairingResponseSerializer, PairingSerializer,
                           SimpleNotificationSerializer)
 from .services.auth_service import AuthServiceException
+from .services.notification_service import NotificationServiceException
 from .tasks import send_notification_to_devices
 
 logger = getLogger(__name__)
@@ -31,7 +32,7 @@ def custom_exception_handler(exc, context):
 
     # Now add the HTTP status code to the response.
     if not response:
-        if isinstance(exc, AuthServiceException):
+        if isinstance(exc, (AuthServiceException, NotificationServiceException)):
             response = Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         else:
             response = Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
