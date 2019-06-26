@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 from django.db import models
 
@@ -72,9 +71,9 @@ class NotificationType(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
     # For next attributes, when `None` device type is disabled, else `build_number` of `Device` must be >=
-    ios = models.PositiveIntegerField(default=None, null=True)
-    android = models.PositiveIntegerField(default=None, null=True)
-    extension = models.PositiveIntegerField(default=None, null=True)
+    ios = models.PositiveIntegerField(default=None, null=True, blank=True)
+    android = models.PositiveIntegerField(default=None, null=True, blank=True)
+    extension = models.PositiveIntegerField(default=None, null=True, blank=True)
 
     def matches_device(self, device: Device) -> bool:
         device_type = device.get_device_type()
