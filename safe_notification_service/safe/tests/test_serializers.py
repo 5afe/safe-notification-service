@@ -102,7 +102,6 @@ class TestSerializers(TestCase):
         notification_data = get_notification_mock_data()
         serializer = NotificationSerializer(data=notification_data)
         self.assertTrue(serializer.is_valid())
-        self.assertFalse(serializer.save())
 
         # Message no json compliant
         notification_data = get_notification_mock_data()

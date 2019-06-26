@@ -5,29 +5,23 @@ from .models import Device, DevicePair, NotificationType
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('general_information', {
-           'fields': ('push_token', 'owner')
-        }),
-        ('application_information', {
-            'fields': ('client', 'version_name', 'build_number', 'bundle')
-        }),
-    )
+    date_hierarchy = 'created'
     list_display = ('created', 'push_token', 'owner', 'client', 'version_name')
+    list_filter = ('client', 'version_name')
+    ordering = ['-created']
     readonly_fields = ('created', 'modified')
+    search_fields = ['owner', 'push_token']
 
 
 @admin.register(DevicePair)
 class DevicePairAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('general_information', {
-           'fields': ('authorizing_device', 'authorized_device',)
-        }),
-    )
     list_display = ('created', 'authorizing_device', 'authorized_device',)
     readonly_fields = ('created', 'modified')
+    search_fields = ['authorizing_device', 'authorized_device']
 
 
 @admin.register(NotificationType)
 class NotificationTypeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'ios', 'android', 'web')
+    list_display = ('name', 'description', 'ios', 'android', 'extension')
+    list_filter = ('name', 'ios', 'android', 'extension')
+    search_fields = ['name', 'description']

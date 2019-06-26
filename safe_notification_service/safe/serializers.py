@@ -18,7 +18,7 @@ from safe_notification_service.ether.signing import EthereumSignedMessage
 from safe_notification_service.firebase.client import FirebaseProvider
 from safe_notification_service.safe.models import (Device, DevicePair,
                                                    DeviceTypeEnum)
-from safe_notification_service.safe.tasks import send_notification
+from safe_notification_service.safe.tasks import send_notification_task
 
 from .helpers import validate_google_billing_purchase
 
@@ -237,34 +237,6 @@ class NotificationSerializer(SignedMessageSerializer):
     def get_hashed_fields(self, data: Dict[str, Any]) -> Tuple[str]:
         return data['message']
 
-    def create(self, validated_data):
-        """
-        Takes care of getting the valid device pairs for the signing user and
-        sends the notifications.
-        """
-        signer_address = validated_data['signing_address']
-        devices = validated_data['devices']
-        # convert message to JSON
-        message = json.loads(validated_data['message'])
-
-        pairings = DevicePair.objects.filter(
-            (Q(authorizing_device__owner__in=devices) & Q(authorized_device__owner=signer_address))
-        ).select_related('authorizing_device')
-
-        logger.info('Found %s paired devices, sender: %s, devices: %s' % (pairings.count(), signer_address, devices))
-
-        for pairing in pairings:
-            # Call celery task for sending notification
-            if pairing.authorizing_device.push_token:
-                send_notification.delay(message, pairing.authorizing_device.push_token)
-            else:
-                logger.warning("Address %s has no push_token", pairing.authorizing_device.owner)
-
-        return pairings
-
-    def to_representation(self, instance):
-        return {}
-
 
 class SimpleNotificationSerializer(serializers.Serializer):
     devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
@@ -282,34 +254,6 @@ class SimpleNotificationSerializer(serializers.Serializer):
         if len(set(value)) != len(value):
             raise ValidationError("Duplicated addresses are forbidden")
         return value
-
-    def create(self, validated_data):
-        """
-        Takes care of getting the valid device pairs for the signing user and
-        sends the notifications.
-        """
-        devices = []
-        for owner in validated_data['devices']:
-            try:
-                devices.append(Device.objects.get(owner=owner))
-            except Device.DoesNotExist:
-                pass
-                # raise ValidationError('Owner=%s not found' % owner)
-
-        # convert message to JSON
-        message = json.loads(validated_data['message'])
-
-        for device in devices:
-            # Call celery task for sending notification
-            if device.push_token:
-                send_notification.delay(message, device.push_token)
-            else:
-                logger.warning("Address %s has no push_token", device.owner)
-
-        return devices
-
-    def to_representation(self, instance):
-        return {}
 
 
 class GoogleInAppPurchaseSerializer(serializers.Serializer):
