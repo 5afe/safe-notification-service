@@ -45,7 +45,13 @@ class TestViewsV2(APITestCase):
             'version_name': version_name,
             'client': client,
             'bundle': bundle,
+            'signatures': [],
         }
+
+        # No signatures provided
+        response = self.client.post(url, data=data, format='json')
+        self.assertEqual('At least one signature must be provided', response.json()['nonFieldErrors'][0])
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         data['signatures'] = self._sign_auth(data, [account])
         response = self.client.post(url, data=data, format='json')

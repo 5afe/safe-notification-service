@@ -63,7 +63,7 @@ class SignedMessageSerializer(serializers.Serializer):
 class MultipleSignedMessageSerializer(serializers.Serializer):
     """
     Inherit from this class and define get_hashed_fields function
-    Take care not to define `message`, `message_hash` or `signing_address` fields
+    Be careful of not defining `message`, `message_hash` or `signing_address` fields
     """
     signatures = SignatureSerializer(many=True)
 
@@ -71,16 +71,15 @@ class MultipleSignedMessageSerializer(serializers.Serializer):
         super().validate(data)
         message = ''.join(self.get_hashed_fields(data))
         data['message'] = message
-        signing_addresses = []
+        data['signing_addresses'] = []
         for signature in data['signatures']:
             v = signature['v']
             r = signature['r']
             s = signature['s']
             ethereum_signed_message = EthereumSignedMessage(message, v, r, s)
             data['message_hash'] = ethereum_signed_message.message_hash
-            signing_addresses.append(ethereum_signed_message.get_signing_address())
+            data['signing_addresses'].append(ethereum_signed_message.get_signing_address())
 
-        data['signing_addresses'] = signing_addresses
         return data
 
     @abstractmethod
@@ -145,6 +144,12 @@ class AuthV2Serializer(MultipleSignedMessageSerializer):
             raise ValidationError('Client must be one of %s' % [d.name.lower() for d in DeviceTypeEnum])
 
         return client
+
+    def validate(self, data):
+        data = super().validate(data)
+        if not data['signing_addresses']:
+            raise ValidationError('At least one signature must be provided')
+        return data
 
 
 class TemporaryAuthorizationSerializer(SignedMessageSerializer):
