@@ -17,7 +17,7 @@ class DeviceAdmin(admin.ModelAdmin):
 class DevicePairAdmin(admin.ModelAdmin):
     list_display = ('created', 'authorizing_device', 'authorized_device',)
     readonly_fields = ('created', 'modified')
-    search_fields = ['authorizing_device', 'authorized_device']
+    search_fields = ['authorizing_device__owner', 'authorized_device__owner']
 
 
 @admin.register(NotificationType)
