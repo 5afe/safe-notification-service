@@ -1,5 +1,6 @@
 from django.urls import reverse
 
+from eth_account import Account
 from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -83,35 +84,34 @@ class TestViews(APITestCase):
         self.assertIsNone(Device.objects.get(owner=device_address).push_token)
 
     def test_pairing_deletion(self):
-        another_device_address, another_device_key = get_eth_address_with_key()
-        device_address, device_key = get_eth_address_with_key()
-        device_2_address, device_2_key = get_eth_address_with_key()
+        another_device = Account.create()
+        device = Account.create()
+        device_2 = Account.create()
 
-        pairing_data = get_pairing_mock_data(another_device_address=another_device_address,
-                                             another_device_key=another_device_key, device_key=device_key)
+        pairing_data = get_pairing_mock_data(another_device_address=another_device.address,
+                                             another_device_key=another_device.privateKey, device_key=device.privateKey)
 
-        pairing_data_2 = get_pairing_mock_data(another_device_address=device_2_address,
-                                               another_device_key=device_2_key, device_key=device_key)
+        pairing_data_2 = get_pairing_mock_data(another_device_address=device_2.address,
+                                               another_device_key=device_2.privateKey, device_key=device.privateKey)
 
-        DeviceFactory(owner=device_address)
-        DeviceFactory(owner=another_device_address)
-        DeviceFactory(owner=device_2_address)
+        DeviceFactory(owner=device.address)
+        DeviceFactory(owner=another_device.address)
+        DeviceFactory(owner=device_2.address)
 
         for pairing in (pairing_data, pairing_data_2):
             response = self.client.post(reverse('v1:pairing'), data=pairing, format='json')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         deletion_data = {
-            'device': another_device_address,
-            'signature': get_signature_json(another_device_address, device_key)
+            'device': another_device.address,
+            'signature': get_signature_json(another_device.address, device.privateKey)
         }
 
         response = self.client.delete(reverse('v1:pairing'), data=deletion_data, format='json')
-
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        self.assertEqual(DevicePair.objects.filter(authorizing_device__owner=device_address).count(), 1)
-        self.assertEqual(DevicePair.objects.filter(authorized_device__owner=device_address).count(), 1)
+        self.assertEqual(DevicePair.objects.filter(authorizing_device__owner=device.address).count(), 1)
+        self.assertEqual(DevicePair.objects.filter(authorized_device__owner=device.address).count(), 1)
 
     def test_notification_creation(self):
         data = get_notification_mock_data()

@@ -134,12 +134,12 @@ class PairingView(CreateAPIView):
         """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            signer_address = serializer.validated_data['signing_address']
+            signing_address = serializer.validated_data['signing_address']
             device_address = serializer.validated_data['device']
 
-            DevicePair.objects.filter(authorizing_device__owner=signer_address,
+            DevicePair.objects.filter(authorizing_device__owner=signing_address,
                                       authorized_device__owner=device_address).delete()
-            DevicePair.objects.filter(authorized_device__owner=signer_address,
+            DevicePair.objects.filter(authorized_device__owner=signing_address,
                                       authorizing_device__owner=device_address).delete()
 
             return Response(status=status.HTTP_204_NO_CONTENT)
