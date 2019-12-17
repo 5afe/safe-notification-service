@@ -89,10 +89,10 @@ class TestViews(APITestCase):
         device_2 = Account.create()
 
         pairing_data = get_pairing_mock_data(another_device_address=another_device.address,
-                                             another_device_key=another_device.privateKey, device_key=device.privateKey)
+                                             another_device_key=another_device.key, device_key=device.key)
 
         pairing_data_2 = get_pairing_mock_data(another_device_address=device_2.address,
-                                               another_device_key=device_2.privateKey, device_key=device.privateKey)
+                                               another_device_key=device_2.key, device_key=device.key)
 
         DeviceFactory(owner=device.address)
         DeviceFactory(owner=another_device.address)
@@ -104,7 +104,7 @@ class TestViews(APITestCase):
 
         deletion_data = {
             'device': another_device.address,
-            'signature': get_signature_json(another_device.address, device.privateKey)
+            'signature': get_signature_json(another_device.address, device.key)
         }
 
         response = self.client.delete(reverse('v1:pairing'), data=deletion_data, format='json')
