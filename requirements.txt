@@ -21,4 +21,4 @@ jsonschema==2.6.0
 psycopg2-binary==2.8.4
 redis==3.3.11
 requests==2.22.0
-web3==5.4.0
+web3==5.5.0
