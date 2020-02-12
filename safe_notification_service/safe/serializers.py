@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Any, Dict, Tuple
 
 from django.conf import settings
-from django.db.models import Q
 from django.utils import timezone
 
 from rest_framework import serializers
@@ -18,7 +17,6 @@ from safe_notification_service.ether.signing import EthereumSignedMessage
 from safe_notification_service.firebase.client import FirebaseProvider
 from safe_notification_service.safe.models import (Device, DevicePair,
                                                    DeviceTypeEnum)
-from safe_notification_service.safe.tasks import send_notification_task
 
 from .helpers import validate_google_billing_purchase
 
@@ -218,7 +216,7 @@ class PairingDeletionSerializer(SignedMessageSerializer):
 
 class NotificationSerializer(SignedMessageSerializer):
     devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
-    message = serializers.CharField()
+    message = serializers.CharField(max_length=4096)  # 4Kb, expecting UTF-8 characters to get into 1 Byte
 
     def validate_message(self, data):
         try:
@@ -245,7 +243,7 @@ class NotificationSerializer(SignedMessageSerializer):
 
 class SimpleNotificationSerializer(serializers.Serializer):
     devices = serializers.ListField(child=EthereumAddressField(), min_length=1)
-    message = serializers.CharField()
+    message = serializers.CharField(max_length=4096)  # 4Kb, expecting UTF-8 characters to get into 1 Byte
     password = serializers.CharField(allow_blank=True, default='')
 
     def validate_message(self, value):

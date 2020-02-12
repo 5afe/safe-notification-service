@@ -1,6 +1,6 @@
 import json
-from datetime import timedelta
-from typing import Tuple
+from datetime import datetime, timedelta
+from typing import List, Optional, Tuple
 
 from django.utils import timezone
 
@@ -9,8 +9,6 @@ from eth_account import Account
 from faker import Faker
 
 from safe_notification_service.ether.signing import EthereumSigner
-from safe_notification_service.ether.tests.factories import \
-    get_eth_address_with_key
 
 from ..models import Device, DevicePair, DeviceTypeEnum, NotificationType
 from ..serializers import isoformat_without_ms
@@ -85,42 +83,38 @@ def get_auth_mock_data(key, token=None):
     }
 
 
-def get_pairing_mock_data(expiration_date=None, another_device_key=None, another_device_address=None, device_key=None):
+def get_pairing_mock_data(expiration_date: Optional[datetime] = None,
+                          another_device_account: Optional[Account] = None,
+                          device_account: Optional[Account] = None):
     """ Generates a dictionary data for pairing purposes """
-    if not expiration_date:
-        expiration_date = isoformat_without_ms((timezone.now() + timedelta(days=2)))
-    if not another_device_address or not another_device_key:
-        another_device_address, another_device_key = get_eth_address_with_key()
-    if not device_key:
-        device_address, device_key = get_eth_address_with_key()
+    expiration_date = expiration_date or isoformat_without_ms((timezone.now() + timedelta(days=2)))
+    another_device_account = another_device_account or Account.create()
+    device_account = device_account or Account.create()
 
     return {
         "temporary_authorization": {
             "expiration_date": expiration_date,
-            "signature": get_signature_json(expiration_date, another_device_key),
+            "signature": get_signature_json(expiration_date, another_device_account.key),
         },
-        "signature":  get_signature_json(another_device_address, device_key)
+        "signature":  get_signature_json(another_device_account.address, device_account.key)
     }
 
 
-def get_notification_mock_data(devices=None, eth_address_and_key: Tuple[str, str]= None):
+def get_notification_mock_data(devices: Optional[List[str]] = None, account: Optional[Account] = None,
+                               message: Optional[str] = None):
     """ Generates a dictionary data specifying a notification message """
-    message = json.dumps({'my_message': faker.name(), 'my_another_key': faker.name()})
+    message = message or json.dumps({'my_message': faker.name(), 'my_another_key': faker.name()})
 
-    if eth_address_and_key:
-        eth_address, eth_key = eth_address_and_key
-    else:
-        eth_address, eth_key = get_eth_address_with_key()
+    if not account:
+        account = Account.create()
 
     if not devices:
-        eth_address2, _ = get_eth_address_with_key()
-        eth_address3, _ = get_eth_address_with_key()
-        devices = [eth_address2, eth_address3]
+        devices = [Account.create().address, Account.create().address]
 
     return {
         'devices': devices,
         'message': message,
-        'signature': get_signature_json(message, eth_key),
+        'signature': get_signature_json(message, account.key),
     }
 
 

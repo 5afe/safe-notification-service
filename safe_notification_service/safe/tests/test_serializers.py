@@ -1,8 +1,10 @@
+import json
 from datetime import timedelta
 
 from django.test import TestCase
 from django.utils import timezone
 
+from eth_account import Account
 from faker import Faker
 from rest_framework.exceptions import ValidationError
 
@@ -46,15 +48,16 @@ class TestSerializers(TestCase):
         self.assertRaises(ValidationError, auth_serializer.is_valid, raise_exception=True)
 
     def test_pairing_serializer(self):
-        another_device_address, another_device_key = get_eth_address_with_key()
-        device_address, device_key = get_eth_address_with_key()
-        data = get_pairing_mock_data(another_device_address=another_device_address, another_device_key=another_device_key, device_key=device_key)
+        another_device_account = Account.create()
+        device_account = Account.create()
+        data = get_pairing_mock_data(another_device_account=another_device_account,
+                                     device_account=device_account)
         pairing_serializer = PairingSerializer(data=data)
 
         self.assertTrue(pairing_serializer.is_valid())
-        self.assertEqual(another_device_address,
+        self.assertEqual(another_device_account.address,
                          pairing_serializer.validated_data['temporary_authorization']['signing_address'])
-        self.assertEqual(device_address, pairing_serializer.validated_data['signing_address'])
+        self.assertEqual(device_account.address, pairing_serializer.validated_data['signing_address'])
 
     def test_pairing_with_date_exceeded(self):
         expiration_date = isoformat_without_ms(timezone.now() - timedelta(days=2))
@@ -102,6 +105,13 @@ class TestSerializers(TestCase):
         notification_data = get_notification_mock_data()
         serializer = NotificationSerializer(data=notification_data)
         self.assertTrue(serializer.is_valid())
+
+        # Message longer than 4Kb
+        notification_data = get_notification_mock_data(message=json.dumps({'my_message': 'A' * 4096}))
+        serializer = NotificationSerializer(data=notification_data)
+        serializer.is_valid()
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('4096', serializer.errors['message'][0])
 
         # Message no json compliant
         notification_data = get_notification_mock_data()
