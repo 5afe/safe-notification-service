@@ -64,4 +64,4 @@ if os.environ.get('USE_DOCKER') == 'yes':
 # Celery
 # ------------------------------------------------------------------------------
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-task_always_eager
-# CELERY_ALWAYS_EAGER = True
+# CELERY_TASK_ALWAYS_EAGER = True
