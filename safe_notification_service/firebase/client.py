@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Dict
 
 from firebase_admin import credentials, initialize_app, messaging
+from firebase_admin.exceptions import FirebaseError
 
 from safe_notification_service.utils.singleton import singleton
 
@@ -100,7 +101,7 @@ class FirebaseClient(MessagingClient):
             )
             messaging.send(message, dry_run=True)
             return True
-        except messaging.ApiCallError:
+        except FirebaseError:
             return False
 
     def send_message(self, data: Dict[str, any], token: str, ios: bool = True) -> str:
