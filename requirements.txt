@@ -12,13 +12,12 @@ docutils==0.14
 drf-yasg[validation]==1.17.0
 ethereum==2.3.2
 factory-boy==2.12.0
-faker==4.0.0
-firebase-admin==3.2.1
+firebase-admin==4.0.0
 gevent==1.4.0
-gnosis-py==2.0.4
+gnosis-py==2.1.1
 gunicorn==20.0.4
-jsonschema==2.6.0
+jsonschema==3.2.0
 psycopg2-binary==2.8.4
 redis==3.4.1
 requests==2.22.0
-web3==5.5.0
+web3==5.5.1
