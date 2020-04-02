@@ -75,3 +75,4 @@ env/
 venv/
 config/settings/dev.py
 db.sqlite3
+.mypy_cache/

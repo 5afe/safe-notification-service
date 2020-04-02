@@ -2,13 +2,15 @@
 
 set -euo pipefail
 
-echo "==> Migrating Django models ... "
-python manage.py migrate --noinput
+sleep 10  # Wait for migrations
 
-echo "==> Collecting statics ... "
+echo "==> $(date +%H:%M:%S) ==> Collecting statics... "
 DOCKER_SHARED_DIR=/nginx
 rm -rf $DOCKER_SHARED_DIR/*
-STATIC_ROOT=$DOCKER_SHARED_DIR/staticfiles python manage.py collectstatic --noinput
+STATIC_ROOT=$DOCKER_SHARED_DIR/staticfiles python manage.py collectstatic --noinput &
 
-echo "==> Running Gunicorn ... "
-exec gunicorn --pythonpath "$PWD" config.wsgi:application --log-file=- --error-logfile=- --access-logfile=- --log-level info --logger-class='safe_notification_service.safe.utils.CustomGunicornLogger' -b unix:$DOCKER_SHARED_DIR/gunicorn.socket -b 0.0.0.0:8888 --worker-class gevent
+echo "==> $(date +%H:%M:%S) ==> Send via Slack info about service version and network"
+python manage.py send_slack_notification
+
+echo "==> $(date +%H:%M:%S) ==> Running Gunicorn... "
+exec gunicorn --worker-class gevent --pythonpath "$PWD" config.wsgi:application --timeout 60 --graceful-timeout 60 --log-file=- --error-logfile=- --access-logfile=- --log-level info --logger-class='safe_notification_service.safe.utils.CustomGunicornLogger' -b unix:$DOCKER_SHARED_DIR/gunicorn.socket -b 0.0.0.0:8888
