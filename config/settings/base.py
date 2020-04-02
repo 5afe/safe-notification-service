@@ -281,3 +281,6 @@ if FIREBASE_CREDENTIALS_PATH:
 
 # Google InApp Billing
 GOOGLE_BILLING_PUBLIC_KEY_BASE64 = env('GOOGLE_BILLING_PUBLIC_KEY_BASE64', default=None)
+
+# Slack Notifications
+SLACK_API_WEBHOOK = env('SLACK_API_WEBHOOK', default=None)
