@@ -3,6 +3,8 @@ from typing import Dict, List, Optional
 
 from django.db.models import Q
 
+from firebase_admin.messaging import UnregisteredError
+
 from safe_notification_service.firebase.client import (FirebaseProvider,
                                                        MessagingClient)
 
@@ -91,13 +93,13 @@ class NotificationService:
     def send_notification(self, message: Dict[str, any], push_token: str) -> str:
         try:
             return self.messaging_client.send_message(message, push_token)
+        except UnregisteredError as exc:
+            # Push token not valid
+            str_exc = str(exc)
+            logger.warning('Push token not valid. Message=%s push-token=%s exception=%s',
+                           message, push_token, str_exc, exc_info=True)
+            raise InvalidPushToken(str_exc) from exc
         except Exception as exc:
             str_exc = str(exc)
-            if 'Requested entity was not found' in str_exc:
-                # Push token not valid
-                logger.warning('Push token not valid. Message=%s push-token=%s exception=%s',
-                               message, push_token, str_exc, exc_info=True)
-                raise InvalidPushToken(str_exc) from exc
-            else:
-                logger.error('Message=%s push-token=%s exception=%s', message, push_token, str_exc, exc_info=True)
-                raise UnknownMessagingException(str_exc) from exc
+            logger.error('Message=%s push-token=%s exception=%s', message, push_token, str_exc, exc_info=True)
+            raise UnknownMessagingException(str_exc) from exc
