@@ -11,7 +11,7 @@ env:
   - DJANGO_SETTINGS_MODULE=config.settings.test
   - DATABASE_URL=psql://postgres@localhost/travisci
 addons:
-  postgresql: "9.6"
+  postgresql: "10"
 services:
   - postgresql
   - docker
