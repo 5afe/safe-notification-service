@@ -3,7 +3,6 @@ from logging import getLogger
 from typing import Dict
 
 from firebase_admin import credentials, initialize_app, messaging
-from firebase_admin.exceptions import FirebaseError
 from firebase_admin.messaging import UnregisteredError
 
 from safe_notification_service.utils.singleton import singleton
@@ -54,11 +53,11 @@ class FirebaseClient(MessagingClient):
         payload=messaging.APNSPayload(
             aps=messaging.Aps(
                 alert=messaging.ApsAlert(
-                    # This is a localized key that iOS will search in 
+                    # This is a localized key that iOS will search in
                     # the safe iOS app to show as a default title
                     title_loc_key='sign_transaction_request_title',
                 ),
-                # Means the content of the notification will be 
+                # Means the content of the notification will be
                 # modified by the safe app.
                 # Depending on the 'type' custom field,
                 # 'alert.title' and 'alert.body' above will be

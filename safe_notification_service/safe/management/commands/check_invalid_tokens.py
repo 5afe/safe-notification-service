@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from safe_notification_service.firebase.client import (FirebaseProvider,
-                                                       MockedClient)
+from safe_notification_service.firebase.client import FirebaseProvider
 
 from ...models import Device
 

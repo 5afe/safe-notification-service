@@ -4,8 +4,7 @@ from ethereum import utils
 
 
 class EthereumSignedMessage:
-
-    def __init__(self, message: str, v: int, r: int, s: int, hash_prefix: str=settings.ETH_HASH_PREFIX):
+    def __init__(self, message: str, v: int, r: int, s: int, hash_prefix: str = settings.ETH_HASH_PREFIX):
         """
         :param message: message
         :type message: str
@@ -58,8 +57,7 @@ class EthereumSignedMessage:
 
 
 class EthereumSigner(EthereumSignedMessage):
-
-    def __init__(self, message: str, key: bytes, hash_prefix: str=settings.ETH_HASH_PREFIX):
+    def __init__(self, message: str, key: bytes, hash_prefix: str = settings.ETH_HASH_PREFIX):
         """
         :param message: message
         :param key: ethereum key for signing the message

@@ -6,6 +6,7 @@ from ..singleton import singleton
 
 faker = Faker()
 
+
 @singleton
 class MyClass:
     def __init__(self, name):
@@ -13,7 +14,6 @@ class MyClass:
 
 
 class TestSigning(TestCase):
-
     def test_singleton(self):
         name = faker.name()
         my_class = MyClass(name)

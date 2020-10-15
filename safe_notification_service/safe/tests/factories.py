@@ -6,6 +6,7 @@ from django.utils import timezone
 
 import factory.fuzzy
 from eth_account import Account
+from factory.django import DjangoModelFactory
 from faker import Faker
 
 from safe_notification_service.ether.signing import EthereumSigner
@@ -16,7 +17,7 @@ from ..serializers import isoformat_without_ms
 faker = Faker()
 
 
-class DeviceFactory(factory.DjangoModelFactory):
+class DeviceFactory(DjangoModelFactory):
     push_token = factory.Faker('sha256', raw_output=False)
     owner = factory.LazyFunction(lambda: Account.create().address)
     push_token = factory.fuzzy.FuzzyText(length=20)
@@ -29,7 +30,7 @@ class DeviceFactory(factory.DjangoModelFactory):
         model = Device
 
 
-class DevicePairFactory(factory.DjangoModelFactory):
+class DevicePairFactory(DjangoModelFactory):
     authorizing_device = factory.SubFactory(DeviceFactory)
     authorized_device = factory.SubFactory(DeviceFactory)
 
@@ -37,7 +38,7 @@ class DevicePairFactory(factory.DjangoModelFactory):
         model = DevicePair
 
 
-class NotificationTypeFactory(factory.DjangoModelFactory):
+class NotificationTypeFactory(DjangoModelFactory):
     name = factory.Faker('name')
     description = factory.Faker('sentence')
     ios = None
