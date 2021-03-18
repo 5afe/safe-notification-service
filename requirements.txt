@@ -1,4 +1,4 @@
-Django==3.1.2
+Django==3.1.6
 celery==4.4.7
 cryptography==3.2.1
 django-authtools==1.7.0
