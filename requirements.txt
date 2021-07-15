@@ -1,5 +1,5 @@
-Django==3.1.11
-celery==5.1.0
+Django==3.2.5
+celery==5.1.2
 cryptography==3.4.7
 django-authtools==1.7.0
 django-debug-toolbar==3.2.1
@@ -12,11 +12,11 @@ docutils==0.17.1
 drf-yasg[validation]==1.20.0
 ethereum==2.3.2
 factory-boy==3.2.0
-firebase-admin==5.0.0
-gnosis-py==3.0.4
+firebase-admin==5.0.1
+gnosis-py==3.1.13
 gunicorn[gevent]==20.1.0
 jsonschema==3.2.0
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.1
 redis==3.5.3
-requests==2.25.1
+requests==2.26.0
 web3==5.19.0
