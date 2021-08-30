@@ -1,6 +1,6 @@
 Django==3.2.6
 celery==5.1.2
-cryptography==3.4.7
+cryptography==3.4.8
 django-authtools==1.7.0
 django-debug-toolbar==3.2.2
 django-environ==0.4.5
