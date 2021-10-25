@@ -1,5 +1,5 @@
 -r requirements.txt
-coverage==5.5
+coverage==6.0.2
 faker==9.5.2
 pytest-django==4.4.0
 pytest-sugar==0.9.4
