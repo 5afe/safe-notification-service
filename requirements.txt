@@ -3,7 +3,7 @@ celery==5.1.2
 cryptography==35.0.0
 django-authtools==1.7.0
 django-debug-toolbar==3.2.2
-django-environ==0.8.0
+django-environ==0.8.1
 django-filter==21.1
 django-model-utils==4.2.0
 djangorestframework-camel-case==1.2.0
