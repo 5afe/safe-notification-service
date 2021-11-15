@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: pip
     directory: "/"
+    open-pull-requests-limit: 0 # Zero PRs means that only security updates will be triggered
     schedule:
       interval: weekly
       day: monday
@@ -10,6 +11,7 @@ updates:
 
   - package-ecosystem: docker
     directory: "/docker/web"
+    open-pull-requests-limit: 0 # Zero PRs means that only security updates will be triggered
     schedule:
       interval: weekly
       day: monday
@@ -17,6 +19,7 @@ updates:
       - "uxio0"
 
   - package-ecosystem: github-actions
+    open-pull-requests-limit: 0 # Zero PRs means that only security updates will be triggered
     directory: "/"
     schedule:
       interval: weekly
