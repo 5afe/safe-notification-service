@@ -108,7 +108,7 @@ jobs:
         context: .
         push: true
         file: docker/web/Dockerfile
-        tags: gnosispm/safe-notification-service:${{ env.DOCKER_TAG }}
+        tags: safeglobal/safe-notification-service:${{ env.DOCKER_TAG }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new
     - # Temp fix
